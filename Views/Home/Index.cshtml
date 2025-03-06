@@ -1,5 +1,5 @@
-﻿
-<div class="container">
+﻿@model List<HelloChat.ViewModels.ConversationsViewModel>
+@*<div class="container">
     <div class="row p-1">
         <div class="col-1">User</div>
         <div class="col-5"><input type="text" id="userInput" /></div>
@@ -23,67 +23,30 @@
             <ul id="messagesList"></ul>
         </div>
     </div>
-</div>
+</div>*@
 
-@* <div class="container"> 
+ <div class="container"> 
 <div class="chat-history">
     <h2>Conversations</h2>
     <input type="text" class="chat-history-search">
     <div class="hisory-chat-cards">
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp" alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp     " alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp     " alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp     " alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp     " alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
-        <div class="item">
-            <div>
-                <img src="/images/blank-profile-picture-973460_960_720.webp     " alt="profile-picture">
-            </div>
-            <div>
-                <h3 class="profile-name">David</h3>
-                <p class="last-message">Ne ue . 56 m</p>
-            </div>
-        </div>
+        @foreach (var item in Model)
+            {
+                <div class="item">
+                    <div>
+                        <img src="@item.ProfileImageUrl" alt="profile-picture">
+                    </div>
+                    <div>
+                        <h3 class="profile-name">@item.Name</h3>
+                        @if(item.lastMessage==null){
+                            <p class="last-message">No messages</p>
+                        }
+                        else{
+                            <p class="last-message">@item.lastMessage . @item.sentTime</p>
+                        }
+                    </div>
+                </div>
+		    }
     </div>
 </div>
 <div class="chat-box">
@@ -108,6 +71,6 @@
         </svg>
     </div>
 </div>
-  </div>*@
+  </div>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/chat.js"></script>
