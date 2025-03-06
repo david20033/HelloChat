@@ -15,6 +15,8 @@ namespace HelloChat.Controllers
 
         public IActionResult Index()
         {
+            string receiverUserId = "someUserId";
+            ViewBag.ReceiverUserId = receiverUserId;
             return View();
         }
 
