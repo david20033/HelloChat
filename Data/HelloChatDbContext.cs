@@ -10,9 +10,12 @@ public class HelloChatDbContext : IdentityDbContext<IdentityUser>
         : base(options)
     {
     }
-
+    public virtual DbSet<Message> Messages { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<Message>()
+            .Property(m => m.Reaction)
+            .HasConversion<int>();
     }
 }

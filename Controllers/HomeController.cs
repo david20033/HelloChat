@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using HelloChat.Data;
 using HelloChat.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HelloChat.Controllers
@@ -7,16 +9,17 @@ namespace HelloChat.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly HelloChatDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, HelloChatDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
-
+        [Authorize]
         public IActionResult Index()
         {
-            string receiverUserId = "someUserId";
-            ViewBag.ReceiverUserId = receiverUserId;
+
             return View();
         }
 

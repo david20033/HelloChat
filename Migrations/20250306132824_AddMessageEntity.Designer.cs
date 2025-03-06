@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HelloChat.Migrations
 {
     [DbContext(typeof(HelloChatDbContext))]
-    [Migration("20250304132959_AddMessageEntity")]
+    [Migration("20250306132824_AddMessageEntity")]
     partial class AddMessageEntity
     {
         /// <inheritdoc />
@@ -24,6 +24,40 @@ namespace HelloChat.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("HelloChat.Data.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("From_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Reaction")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SeenTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("To_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("isSeen")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Messages");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
