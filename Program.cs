@@ -3,6 +3,10 @@ using HelloChat.Hubs;
 using Microsoft.EntityFrameworkCore;
 using HelloChat.Data;
 using Microsoft.AspNetCore.Identity;
+using HelloChat.Services.IServices;
+using HelloChat.Services;
+using HelloChat.Repositories.IRepositories;
+using HelloChat.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
@@ -16,6 +20,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 //builder.Services.AddDbContext<HelloChatDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;

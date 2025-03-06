@@ -1,0 +1,20 @@
+﻿using HelloChat.Repositories.IRepositories;
+using HelloChat.Services.IServices;
+using HelloChat.ViewModels;
+
+namespace HelloChat.Services
+{
+    public class HomeService : IHomeService
+    {
+        private readonly IAppRepository _repository;
+
+        public HomeService(IAppRepository repository) 
+        {
+            _repository = repository;
+        }
+        public async Task<List<ConversationsViewModel>> GetConversationsViewModel(Guid CurrentUserId)
+        {
+            return  await _repository.GetConversationsAsync(CurrentUserId);
+        }
+    }
+}

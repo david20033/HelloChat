@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Security.Claims;
 using HelloChat.Data;
 using HelloChat.Models;
+using HelloChat.Services;
+using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,42 +13,23 @@ namespace HelloChat.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly HelloChatDbContext _context;
+        private readonly IHomeService _homeService;
 
-        public HomeController(ILogger<HomeController> logger, HelloChatDbContext context)
+        public HomeController(ILogger<HomeController> logger, IHomeService homeService)
         {
             _logger = logger;
-            _context = context;
+            _homeService = homeService;
         }
         [Authorize]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(); 
             }
-
-            var userGuid = Guid.Parse(userId);
-
-            var users = _context.Users.ToList();
-            var messages = _context.Messages
-                .Where(m => m.To_id == userGuid)
-                .ToList();
-
-            var model = users.Select(user =>
-            {
-                var lastMessage = messages
-                    .FirstOrDefault(m => m.From_id == Guid.Parse(user.Id));
-
-                return new ConversationsViewModel
-                {
-                    ProfileImageUrl = "/images/blank-profile-picture.webp", 
-                    lastMessage = lastMessage?.Content,
-                    Name = user.UserName,
-                    sentTime = lastMessage?.CreatedDate
-                };
-            }).ToList();
+            var model = await _homeService.GetConversationsViewModel(Guid.Parse(userId));
+            
             return View(model);
         }
 
