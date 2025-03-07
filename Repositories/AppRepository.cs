@@ -38,7 +38,10 @@ namespace HelloChat.Repositories
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {
-            return await _context.Users.Where(u=>u.UserName == query).ToListAsync();
+            return await _context
+                .Users
+                .Where(u=>u.UserName.Contains(query))
+                .ToListAsync();
         }
     }
 }

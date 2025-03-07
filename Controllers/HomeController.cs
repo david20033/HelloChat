@@ -32,6 +32,16 @@ namespace HelloChat.Controllers
             
             return View(model);
         }
+        public async Task<IActionResult> SearchUsers( string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return Json(new { });
+            }
+            var users = await _homeService.GetIdentityUsersBySearchQuery(query);
+            Console.WriteLine(Json(users));
+            return Json(users);
+        }
         public async Task<IActionResult> Search([FromQuery] string query)
         {
             if (string.IsNullOrEmpty(query)) 

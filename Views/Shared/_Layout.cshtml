@@ -29,12 +29,13 @@
                             <partial name="_LoginPartial" />
                         </li>
                     </ul>
-                    <form asp-action="Search" asp-controller="Home" method="get">
+                    <form id="searchForm" asp-action="Search" asp-controller="Home" method="get">
                         <div class="position-relative">
-                            <input class="form-control ps-4 pe-5 rounded-pill shadow-sm" type="search" placeholder="Search User" aria-label="Search" name="query" style="width: 200px; height: 36px;">
+                            <input id="searchInput" class="form-control ps-4 pe-5 rounded-pill shadow-sm" type="search" placeholder="Search User" aria-label="Search" name="query" style="width: 200px; height: 36px;" autocomplete="off">
                             <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 p-0 border-0 bg-transparent text-primary" type="submit">
                                 <i class="bi bi-search"></i>
                             </button>
+                            <div id="searchResults" class="list-group position-absolute w-100 mt-1" style="display: none; z-index: 1000;"></div>
                         </div>
                     </form>
                 </div>
@@ -50,9 +51,42 @@
             &copy; 2025 - HelloChat - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchInput").on("input", function () {
+                var query = $(this).val();
+                if (query.length >= 2) {
+                    $.ajax({
+                        url: "/Home/SearchUsers",
+                        type: "GET",
+                        data: { query: query },
+                        success: function (data) {
+                            $("#searchResults").empty().show();
+                            if (data.length === 0) {
+                                $("#searchResults").append('<div class="list-group-item">No results found</div>');
+                            } else {
+                                $.each(data, function (i, user) {
+                                    $("#searchResults").append('<a href="/Profile/' + user.id + '" class="list-group-item list-group-item-action">' + user.firstName+' '+user.lastName + '</a>');
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $("#searchResults").hide();
+                }
+            });
+
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest("#searchForm").length) {
+                    $("#searchResults").hide();
+                }
+            });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

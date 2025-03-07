@@ -147,3 +147,18 @@ h2 {
         height: 50px;
         cursor: pointer;
     }
+#searchResults {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+
+    .list-group-item:hover {
+        background: #f8f9fa;
+    }
