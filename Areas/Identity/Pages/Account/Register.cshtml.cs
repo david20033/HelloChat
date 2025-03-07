@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using HelloChat.Attributes;
 using HelloChat.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -78,6 +79,7 @@ namespace HelloChat.Areas.Identity.Pages.Account
 
             [Required]
             [DataType(DataType.Date)]
+            [DateOfBirthValidation]
             public DateTime DateOfBirth { get; set; }
 
             /// <summary>
