@@ -13,7 +13,7 @@ namespace HelloChat.Repositories
         {
             _context = context;
         }
-        public async Task<List<ConversationsViewModel>> GetConversationsAsync(Guid userGuid)
+        public async Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid)
         {
             var users = await _context.Users.ToListAsync();
             var messages = await _context.Messages
@@ -23,7 +23,7 @@ namespace HelloChat.Repositories
             var model = users.Select(user =>
             {
                 var lastMessage = messages
-                    .FirstOrDefault(m => m.From_id == Guid.Parse(user.Id));
+                    .FirstOrDefault(m => m.From_id == user.Id);
 
                 return new ConversationsViewModel
                 {

@@ -12,7 +12,7 @@ namespace HelloChat.Services
         {
             _repository = repository;
         }
-        public async Task<List<ConversationsViewModel>> GetConversationsViewModel(Guid CurrentUserId)
+        public async Task<List<ConversationsViewModel>> GetConversationsViewModel(string CurrentUserId)
         {
             return  await _repository.GetConversationsAsync(CurrentUserId);
         }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using HelloChat.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace HelloChat.Data
 {
@@ -7,11 +9,19 @@ namespace HelloChat.Data
     {
         [Key]
         public Guid Id { get; set; }
-        [Required]
-        public Guid From_id { get; set; }
-        [Required]
-        public Guid To_id { get; set; }
-        [Required]
+
+        [ForeignKey("ConversationId")]
+        public Conversation Conversation { get; set; }
+        public Guid ConversationId { get; set; }
+
+        public string From_id { get; set; }
+        [ForeignKey("From_id")]
+        public IdentityUser From_User { get; set; }
+
+        public string To_id { get; set; }
+        [ForeignKey("To_id")]
+        public IdentityUser To_User { get; set; }
+
         [MaxLength(1000)]
         public string Content { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;

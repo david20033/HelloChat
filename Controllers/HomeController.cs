@@ -28,7 +28,7 @@ namespace HelloChat.Controllers
             {
                 return Unauthorized(); 
             }
-            var model = await _homeService.GetConversationsViewModel(Guid.Parse(userId));
+            var model = await _homeService.GetConversationsViewModel(userId);
             
             return View(model);
         }
