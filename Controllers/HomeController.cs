@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HelloChat.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -20,7 +21,6 @@ namespace HelloChat.Controllers
             _logger = logger;
             _homeService = homeService;
         }
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,7 +32,15 @@ namespace HelloChat.Controllers
             
             return View(model);
         }
-
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrEmpty(query)) 
+            {
+                return RedirectToAction("Index");
+            }
+            var users= await _homeService.GetIdentityUsersBySearchQuery(query);
+            return View(users);
+        }
         public IActionResult Privacy()
         {
             return View();
