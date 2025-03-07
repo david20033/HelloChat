@@ -9,5 +9,6 @@ namespace HelloChat.Repositories.IRepositories
         Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid);
         Task<List<ApplicationUser>> GetUsersBySearchQuery(string query);
         Task<ProfileViewModel> GetProfileViewModelById(string id);
+        Task AddFriendRequest(string FromId, string ToId);
     }
 }

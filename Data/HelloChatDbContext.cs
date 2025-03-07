@@ -11,8 +11,10 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
-    public virtual DbSet<Message> Messages { get; set; }
-    public virtual DbSet<Conversation> Conversations { get; set; }
+    public virtual DbSet<Message> Messages{ get; set; }
+    public virtual DbSet<Conversation> Conversation { get; set; }
+    public virtual DbSet<FriendRequest> FriendRequest { get; set; }
+    public virtual DbSet<Friendship> Friendship { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

@@ -12,6 +12,6 @@ namespace HelloChat.Data
         public ApplicationUser Receiver { get; set; }
         public string ReceiverId { get; set; }
         public DateTime RequestDate { get; set; }
-        public bool isAccepted { get; set; }
+        public bool isAccepted { get; set; } = false;
     }
 }

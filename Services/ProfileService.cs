@@ -16,5 +16,9 @@ namespace HelloChat.Services
         {
             return await _appRepository.GetProfileViewModelById(id);
         }
+        public async Task SendFriendRequest(string FromId, string ToId)
+        {
+            await _appRepository.AddFriendRequest(FromId, ToId);
+        }
     }
 }

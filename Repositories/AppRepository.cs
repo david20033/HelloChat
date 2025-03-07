@@ -4,6 +4,7 @@ using HelloChat.Repositories.IRepositories;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HelloChat.Repositories
 {
@@ -54,6 +55,20 @@ namespace HelloChat.Repositories
                 Id = id,
                 ProfilePicturePath = user?.ProfilePicturePath,
             };
+        }
+
+        public async Task AddFriendRequest(string FromId, string ToId)
+        {
+            if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
+
+             await _context.FriendRequest.AddAsync(new FriendRequest
+            {
+                Id = Guid.NewGuid(),
+                RequesterId = FromId,
+                ReceiverId = ToId,
+                RequestDate = DateTime.Now,
+            });
+            await _context.SaveChangesAsync();
         }
     }
 }
