@@ -10,10 +10,10 @@ namespace HelloChat.Data
         [Key]
         public Guid Id { get; set; }
         [ForeignKey("User1Id")]
-        public IdentityUser User1 { get; set; }
+        public ApplicationUser User1 { get; set; }
         public string User1Id { get;set; }
         [ForeignKey("User2Id")]
-        public IdentityUser User2 { get; set; }
+        public ApplicationUser User2 { get; set; }
         public string User2Id { get; set; }
         public ICollection<Message> Messages { get; set; } = [];
     }

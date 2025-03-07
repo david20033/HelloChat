@@ -7,6 +7,6 @@ namespace HelloChat.Repositories.IRepositories
     public interface IAppRepository
     {
         Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid);
-        Task<List<IdentityUser>> GetUsersBySearchQuery(string query);
+        Task<List<ApplicationUser>> GetUsersBySearchQuery(string query);
     }
 }

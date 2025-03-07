@@ -16,11 +16,11 @@ namespace HelloChat.Data
 
         public string From_id { get; set; }
         [ForeignKey("From_id")]
-        public IdentityUser From_User { get; set; }
+        public ApplicationUser From_User { get; set; }
 
         public string To_id { get; set; }
         [ForeignKey("To_id")]
-        public IdentityUser To_User { get; set; }
+        public ApplicationUser To_User { get; set; }
 
         [MaxLength(1000)]
         public string Content { get; set; }

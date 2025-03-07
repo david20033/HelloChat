@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HelloChat.Data;
 
-public class HelloChatDbContext : IdentityDbContext<IdentityUser>
+public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
 {
     public HelloChatDbContext(DbContextOptions<HelloChatDbContext> options)
         : base(options)
