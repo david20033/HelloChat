@@ -70,7 +70,7 @@
                                 $("#searchResults").append('<div class="list-group-item">No results found</div>');
                             } else {
                                 $.each(data, function (i, user) {
-                                    $("#searchResults").append('<a href="/Profile/' + user.id + '" class="list-group-item list-group-item-action">' + user.firstName+' '+user.lastName + '</a>');
+                                    $("#searchResults").append('<a href="/Profile?id=' + user.id + '" class="list-group-item list-group-item-action">' + user.firstName+' '+user.lastName + '</a>');
                                 });
                             }
                         }

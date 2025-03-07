@@ -1,4 +1,5 @@
-﻿using HelloChat.Data;
+﻿using HelloChat.Controllers;
+using HelloChat.Data;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -42,6 +43,17 @@ namespace HelloChat.Repositories
                 .Users
                 .Where(u=>u.UserName.Contains(query))
                 .ToListAsync();
+        }
+        public async Task<ProfileViewModel> GetProfileViewModelById(string id)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            return new ProfileViewModel
+            {
+                Email = user?.Email,
+                FullName = user?.FirstName + " " + user?.LastName,
+                Id = id,
+                ProfilePicturePath = user?.ProfilePicturePath,
+            };
         }
     }
 }
