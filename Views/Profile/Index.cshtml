@@ -24,7 +24,7 @@
             <h2>@Model.FullName</h2>
             <p><strong>Email:</strong> @Model.Email</p>
             <div class="d-flex justify-content-center mt-4">
-                <button class="btn btn-outline-primary me-2" style="width: 120px;">Add Friend</button>
+                <button onclick="window.location.href='@Url.Action("AddFriend", "Profile", new { id = Model.Id })'" class="btn btn-outline-primary me-2" style="width: 120px;">Add Friend</button>
                 <button class="btn btn-outline-success" style="width: 120px;">Send Message</button>
             </div>
         </div>
