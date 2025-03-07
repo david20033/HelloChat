@@ -8,5 +8,8 @@ namespace HelloChat.Data
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? ProfilePicturePath {  get; set; }
+        public ICollection<FriendRequest> SentRequests { get; set; }
+        public ICollection<FriendRequest> ReceivedRequests { get; set; }
+        public ICollection <Friendship> Friendships { get;set; }
     }
 }

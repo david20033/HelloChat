@@ -50,5 +50,33 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
             .WithMany() 
             .HasForeignKey(c => c.User2Id)
             .OnDelete(DeleteBehavior.Restrict);
+
+                builder.Entity<FriendRequest>()
+            .HasOne(fr => fr.Requester)
+            .WithMany(u => u.SentRequests)
+            .HasForeignKey(fr => fr.RequesterId)
+            .OnDelete(DeleteBehavior.Restrict); 
+
+        builder.Entity<FriendRequest>()
+            .HasOne(fr => fr.Receiver)
+            .WithMany(u => u.ReceivedRequests)
+            .HasForeignKey(fr => fr.ReceiverId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Friendship>()
+            .HasKey(f => new { f.User1Id, f.User2Id }); 
+
+        builder.Entity<Friendship>()
+            .HasOne(f => f.User1)
+            .WithMany(u => u.Friendships)
+            .HasForeignKey(f => f.User1Id)
+            .OnDelete(DeleteBehavior.Restrict);  
+
+        
+        builder.Entity<Friendship>()
+            .HasOne(f => f.User2)
+            .WithMany()
+            .HasForeignKey(f => f.User2Id)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
