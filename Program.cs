@@ -22,6 +22,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<IAppRepository, AppRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;
