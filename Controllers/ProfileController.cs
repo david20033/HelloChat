@@ -15,7 +15,7 @@ namespace HelloChat.Controllers
         {
             _profileService = profileService;
         }
-        public async Task<IActionResult> Index([FromQuery]string id)
+        public async Task<IActionResult> Index(string id)
         {
             var ProfileUserId = id;
             var CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -29,10 +29,10 @@ namespace HelloChat.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (id.IsNullOrEmpty()||currentUserId.IsNullOrEmpty())
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { id = id });
             }
             await _profileService.SendFriendRequest(currentUserId, id);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index" ,new {id});
         }
     }
 }

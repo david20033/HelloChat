@@ -49,7 +49,7 @@ namespace HelloChat.Repositories
         }
         public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId )
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == CurrentUserId);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == ProfileUserId);
             var FriendShipStatus = FriendshipStatus.NoFriends;
             if (!_context.Friendship.Where(fr=>(fr.User1Id== ProfileUserId&& fr.User2Id==ProfileUserId)
             ||(fr.User2Id == ProfileUserId && fr.User1Id == ProfileUserId)).IsNullOrEmpty())
