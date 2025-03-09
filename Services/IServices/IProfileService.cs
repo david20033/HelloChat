@@ -7,5 +7,6 @@ namespace HelloChat.Services.IServices
         Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId);
         Task SendFriendRequest(string FromId, string ToId);
         Task DeleteFriend(string FromId, string ToId);
+        Task DeleteFriendRequest(string FromId, string ToId);
     }
 }

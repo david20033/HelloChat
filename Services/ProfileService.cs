@@ -23,7 +23,11 @@ namespace HelloChat.Services
         }
         public async Task DeleteFriend(string FromId, string ToId)
         {
-
+            await _appRepository.DeleteFriend(FromId, ToId);
+        }
+        public async Task DeleteFriendRequest(string FromId, string ToId)
+        {
+            await _appRepository.DeleteFriendRequest(FromId, ToId);
         }
     }
 }

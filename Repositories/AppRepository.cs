@@ -101,5 +101,16 @@ namespace HelloChat.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteFriendRequest(string FromId, string ToId)
+        {
+            if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
+            var Request = await _context.FriendRequest
+                .FirstOrDefaultAsync(fr => fr.RequesterId == FromId && fr.ReceiverId == ToId);
+            if (Request != null)
+            {
+                _context.FriendRequest.Remove(Request);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
