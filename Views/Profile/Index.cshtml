@@ -26,7 +26,20 @@
             <div class="d-flex justify-content-center mt-4">
                 <form id="friendRequestForm" asp-controller="Profile" asp-action="SendFriendRequest" method="post">
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">Add Friend</button>
+                    @if(Model.FriendshipStatus==HelloChat.Enums.FriendshipStatus.NoFriends)
+                    {
+                        <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">Add Friend</button>
+                    }
+                    else if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.Friends){
+                        <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">Unfriend</button>
+                    }
+                    else if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.FriendRequestSend)
+                    {
+                        <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">Cancel friend request</button>
+                    }
+                    else{
+                        <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">Accept Friend Request</button>
+                    }
                 </form>
                 <button class="btn btn-outline-success" style="width: 120px;">Send Message</button>
             </div>
