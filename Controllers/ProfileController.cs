@@ -34,5 +34,18 @@ namespace HelloChat.Controllers
             await _profileService.SendFriendRequest(currentUserId, id);
             return RedirectToAction("Index" ,new {id});
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFriend(string id)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (id.IsNullOrEmpty() || currentUserId.IsNullOrEmpty())
+            {
+                return RedirectToAction("Index", new { id = id });
+            }
+            await _profileService.DeleteFriend(currentUserId, id);
+            return RedirectToAction("Index", new { id });
+        }
     }
 }
