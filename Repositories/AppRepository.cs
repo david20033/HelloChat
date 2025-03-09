@@ -51,18 +51,28 @@ namespace HelloChat.Repositories
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == ProfileUserId);
             var FriendShipStatus = FriendshipStatus.NoFriends;
-            if (!_context.Friendship.Where(fr=>(fr.User1Id== ProfileUserId&& fr.User2Id==ProfileUserId)
-            ||(fr.User2Id == ProfileUserId && fr.User1Id == ProfileUserId)).IsNullOrEmpty())
+
+            if(!_context.FriendRequest.Where(fr=>fr.RequesterId==CurrentUserId&& fr.ReceiverId == ProfileUserId).IsNullOrEmpty())
             {
-                FriendShipStatus = FriendshipStatus.NoFriends;
-            }
-            else if(!_context.FriendRequest.Where(fr=>fr.RequesterId==CurrentUserId&& fr.ReceiverId == ProfileUserId).IsNullOrEmpty())
-            {
-                FriendShipStatus = FriendshipStatus.FriendRequestSend;
+                if(_context.FriendRequest.Where(fr => fr.RequesterId == CurrentUserId && fr.ReceiverId == ProfileUserId).First().isAccepted)
+                {
+                    FriendShipStatus = FriendshipStatus.Friends;
+                }
+                else
+                {
+                    FriendShipStatus = FriendshipStatus.FriendRequestSend;
+                }
             }
             else if (!_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).IsNullOrEmpty())
             {
-                FriendShipStatus = FriendshipStatus.FriendRequestReceived;
+                if(_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).First().isAccepted)
+                {
+                    FriendShipStatus = FriendshipStatus.Friends;
+                }
+                else
+                {
+                    FriendShipStatus = FriendshipStatus.FriendRequestReceived;
+                }
             }
             return new ProfileViewModel
             {
@@ -94,10 +104,14 @@ namespace HelloChat.Repositories
             var FriendShip = await _context.Friendship
                 .FirstOrDefaultAsync(fr => (fr.User1Id == FromId && fr.User2Id == ToId) 
                 || (fr.User2Id == FromId && fr.User1Id == ToId));
+            var FriendRequest = await _context.FriendRequest
+                .FirstOrDefaultAsync(fr => (fr.ReceiverId == FromId && fr.RequesterId == ToId)
+                || (fr.RequesterId == FromId && fr.ReceiverId == ToId));
 
-            if (FriendShip != null)
+            if (FriendShip != null&&FriendRequest!=null)
             {
                 _context.Friendship.Remove(FriendShip);
+                _context.FriendRequest.Remove(FriendRequest);
                 await _context.SaveChangesAsync();
             }
         }
@@ -117,7 +131,7 @@ namespace HelloChat.Repositories
         {
             if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
             var Request = await _context.FriendRequest
-                .FirstOrDefaultAsync(fr => fr.RequesterId == FromId && fr.ReceiverId == ToId);
+                .FirstOrDefaultAsync(fr => fr.RequesterId == ToId && fr.ReceiverId == FromId);
             if (Request == null)
             {
                 return;
