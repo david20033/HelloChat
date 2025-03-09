@@ -29,5 +29,9 @@ namespace HelloChat.Services
         {
             await _appRepository.DeleteFriendRequest(FromId, ToId);
         }
+        public async Task AcceptFriendRequest(string FromId, string ToId)
+        {
+            await _appRepository.AcceptFriendRequest(FromId, ToId);
+        }
     }
 }

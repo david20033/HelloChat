@@ -59,6 +59,18 @@ namespace HelloChat.Controllers
             await _profileService.DeleteFriendRequest(currentUserId, id);
             return RedirectToAction("Index", new { id });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptFriendRequest(string id)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (id.IsNullOrEmpty() || currentUserId.IsNullOrEmpty())
+            {
+                return RedirectToAction("Index", new { id });
+            }
+            await _profileService.AcceptFriendRequest(currentUserId, id);
+            return RedirectToAction("Index", new { id });
+        }
 
     }
 }

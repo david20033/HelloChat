@@ -112,5 +112,26 @@ namespace HelloChat.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task AcceptFriendRequest(string FromId, string ToId)
+        {
+            if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
+            var Request = await _context.FriendRequest
+                .FirstOrDefaultAsync(fr => fr.RequesterId == FromId && fr.ReceiverId == ToId);
+            if (Request == null)
+            {
+                return;
+            }
+            Request.isAccepted=true;
+            var Frienship = new Friendship
+            {
+                Id = Guid.NewGuid(),
+                User1Id = FromId,
+                User2Id = ToId,
+                FriendShipDate = DateTime.Now,
+            };
+            await _context.Friendship.AddAsync(Frienship);
+            await _context.SaveChangesAsync();
+        }
     }
 }
