@@ -4,7 +4,7 @@ namespace HelloChat.Services.IServices
 {
     public interface IProfileService
     {
-        Task<ProfileViewModel> GetProfileViewModelById(string id);
+        Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId);
         Task SendFriendRequest(string FromId, string ToId);
     }
 }

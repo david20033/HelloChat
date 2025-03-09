@@ -17,7 +17,9 @@ namespace HelloChat.Controllers
         }
         public async Task<IActionResult> Index([FromQuery]string id)
         {
-            var model = await _profileService.GetProfileViewModelById(id);
+            var ProfileUserId = id;
+            var CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var model = await _profileService.GetProfileViewModelById(ProfileUserId, CurrentUserId);
             return View(model);
         }
         [HttpPost]

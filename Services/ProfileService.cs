@@ -12,9 +12,10 @@ namespace HelloChat.Services
         {
             _appRepository = appRepository;
         }
-        public async Task<ProfileViewModel> GetProfileViewModelById(string id)
+        public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId)
         {
-            return await _appRepository.GetProfileViewModelById(id);
+            
+            return await _appRepository.GetProfileViewModelById(ProfileUserId, CurrentUserId);
         }
         public async Task SendFriendRequest(string FromId, string ToId)
         {

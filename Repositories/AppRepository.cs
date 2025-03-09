@@ -1,5 +1,7 @@
-﻿using HelloChat.Controllers;
+﻿using System.Security.Claims;
+using HelloChat.Controllers;
 using HelloChat.Data;
+using HelloChat.Enums;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -45,15 +47,30 @@ namespace HelloChat.Repositories
                 .Where(u=>u.UserName.Contains(query))
                 .ToListAsync();
         }
-        public async Task<ProfileViewModel> GetProfileViewModelById(string id)
+        public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId )
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == CurrentUserId);
+            var FriendShipStatus = FriendshipStatus.NoFriends;
+            if (!_context.Friendship.Where(fr=>(fr.User1Id== ProfileUserId&& fr.User2Id==ProfileUserId)
+            ||(fr.User2Id == ProfileUserId && fr.User1Id == ProfileUserId)).IsNullOrEmpty())
+            {
+                FriendShipStatus = FriendshipStatus.NoFriends;
+            }
+            else if(!_context.FriendRequest.Where(fr=>fr.RequesterId==CurrentUserId&& fr.ReceiverId == ProfileUserId).IsNullOrEmpty())
+            {
+                FriendShipStatus = FriendshipStatus.FriendRequestSend;
+            }
+            else if (!_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).IsNullOrEmpty())
+            {
+                FriendShipStatus = FriendshipStatus.FriendRequestReceived;
+            }
             return new ProfileViewModel
             {
                 Email = user?.Email,
                 FullName = user?.FirstName + " " + user?.LastName,
-                Id = id,
+                Id = ProfileUserId,
                 ProfilePicturePath = user?.ProfilePicturePath,
+                FriendshipStatus = FriendShipStatus
             };
         }
 
