@@ -10,6 +10,7 @@ namespace HelloChat.Data
         public string? ProfilePicturePath {  get; set; }
         public ICollection<FriendRequest> SentRequests { get; set; }
         public ICollection<FriendRequest> ReceivedRequests { get; set; }
-        public ICollection <Friendship> Friendships { get;set; }
+        public ICollection<Friendship> FriendshipsInitiated { get; set; }
+        public ICollection<Friendship> FriendshipsReceived { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace HelloChat.Repositories
         }
         public async Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid)
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users.Include(u=>u.FriendshipsInitiated).Include(u => u.FriendshipsReceived).ToListAsync();
             var messages = await _context.Messages
                 .Where(m => m.To_id == userGuid)
                 .ToListAsync();
@@ -38,7 +38,7 @@ namespace HelloChat.Repositories
                 };
             }).ToList();
 
-            return model;
+             return model;
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {
