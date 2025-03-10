@@ -22,5 +22,9 @@ namespace HelloChat.Services
         {
             return await _repository.GetUsersBySearchQuery(query);
         }
+        public async Task SendMessage(string FromId, string ToId, string Content)
+        {
+            await _repository.SendMessage(FromId,ToId,Content);
+        }
     }
 }

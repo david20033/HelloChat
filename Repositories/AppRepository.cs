@@ -51,7 +51,10 @@ namespace HelloChat.Repositories
                 };
                 FriendsList.Add(FriendModel);
             }
-            var Conversation = await _context.Conversation.Where(c=>(c.User1Id==CurrentUserId&&c.User2Id==User2Id)||
+            var Conversation = await _context
+                .Conversation
+                .Include(c=>c.Messages)
+                .Where(c=>(c.User1Id==CurrentUserId&&c.User2Id==User2Id)||
             (c.User2Id == CurrentUserId && c.User1Id == User2Id)).FirstOrDefaultAsync();
             if (Conversation == null&&!User2Id.IsNullOrEmpty())
             {
@@ -180,6 +183,27 @@ namespace HelloChat.Repositories
                 FriendShipDate = DateTime.Now,
             };
             await _context.Friendship.AddAsync(Frienship);
+            await _context.SaveChangesAsync();
+        }
+        public async Task SendMessage (string FromId, string ToId,string Content)
+        {
+            var Conversation = await _context.Conversation
+                .FirstOrDefaultAsync(c => (c.User1Id == FromId && c.User2Id == ToId)
+                || (c.User2Id == FromId && c.User1Id == ToId));
+            var Message = new Message
+            {
+                Id = Guid.NewGuid(),
+                Conversation = Conversation,
+                ConversationId = Conversation.Id,
+                From_id = FromId,
+                To_id = ToId,
+                Content = Content,
+                CreatedDate = DateTime.Now,
+                isSeen = false,
+                SeenTime = null,
+                Reaction = MessageReaction.None,
+            };
+            await _context.Messages.AddAsync(Message);
             await _context.SaveChangesAsync();
         }
     }

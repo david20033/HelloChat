@@ -63,23 +63,28 @@
         <small>06.03 14:49</small>
         @foreach(var m in Model.Messages)
         {
-            if(Model.SenderId==m.From_id){
-                    <p class="message-from message-balon">when</p>
-            }
-            if (Model.ReceiverId == m.From_id)
-            {
-                    <p class="message-to message-balon">when</p>
-            }
+@*             if(Model.SenderId==m.From_id){ *@
+                    <p class="message-from message-balon">@m.Content</p>
+@*             } *@
+@*             if (Model.ReceiverId == m.From_id)
+            { *@
+                <p class="message-to message-balon">@m.Content</p>
+@*             } *@
         }
         <p class="message-from message-balon">when</p>
         <p class="message-to message-balon">this toster</p>
     </div>
-    <div class="bottom">
-        <input type="text">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-        </svg>
-    </div>
+        <div class="bottom">
+            <form id="friendRequestForm" asp-controller="Home" asp-action="SendMessage" method="post">
+                <input type="text" name="Content">
+                <input type="hidden" name="ToId" value="@Model.SenderId">
+                <button type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                    </svg>
+                </button>
+            </form>
+        </div>
 </div>
   </div>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
