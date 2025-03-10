@@ -61,6 +61,16 @@
     </div>
     <div class="messages">
         <small>06.03 14:49</small>
+        @foreach(var m in Model.Messages)
+        {
+            if(Model.SenderId==m.From_id){
+                    <p class="message-from message-balon">when</p>
+            }
+            if (Model.ReceiverId == m.From_id)
+            {
+                    <p class="message-to message-balon">when</p>
+            }
+        }
         <p class="message-from message-balon">when</p>
         <p class="message-to message-balon">this toster</p>
     </div>

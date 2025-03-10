@@ -61,6 +61,8 @@ namespace HelloChat.Repositories
                     User1Id = CurrentUserId,
                     User2Id = User2Id,
                 };
+                await _context.Conversation.AddAsync(Conversation);
+                await _context.SaveChangesAsync();
             }
             return new HomeViewModel
             {
@@ -69,6 +71,8 @@ namespace HelloChat.Repositories
                 Friends = FriendsList,
                 Messages = Conversation?.Messages ?? new List<Message>(),
                 Name = $"{User2?.FirstName} {User2?.LastName}",
+                SenderId = User2Id,
+                ReceiverId = CurrentUserId,
             };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
