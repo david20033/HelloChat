@@ -19,11 +19,30 @@ namespace HelloChat.Repositories
         }
         public async Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid)
         {
-            var users = await _context.Users.Include(u=>u.FriendshipsInitiated).Include(u => u.FriendshipsReceived).ToListAsync();
+            var user = await _context.Users
+                .Where(u=>u.Id==userGuid)
+                .Include(u => u.FriendshipsInitiated)
+                .Include(u => u.FriendshipsReceived)
+                .FirstOrDefaultAsync();
+
+            var Friendships = user.FriendshipsInitiated.Concat(user.FriendshipsReceived);
+            List<ApplicationUser> users = [];
+            foreach (var f in Friendships)
+            {
+                if (f.User1Id == userGuid)
+                {
+                    var u = await _context.Users.Where(u => u.Id == f.User2Id).FirstAsync();
+                    users.Add(u);
+                }
+                else
+                {
+                    var u = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
+                    users.Add(u);
+                }
+            }
             var messages = await _context.Messages
                 .Where(m => m.To_id == userGuid)
                 .ToListAsync();
-
             var model = users.Select(user =>
             {
                 var lastMessage = messages
@@ -38,7 +57,7 @@ namespace HelloChat.Repositories
                 };
             }).ToList();
 
-             return model;
+            return model;
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {
