@@ -6,7 +6,7 @@ namespace HelloChat.Services.IServices
 {
     public interface IHomeService
     {
-        Task<List<ConversationsViewModel>> GetConversationsViewModel(string CurrentUserId);
+        Task<HomeViewModel> GetConversationsViewModel(string CurrentUserId, string User2Id);
         Task<List<ApplicationUser>> GetIdentityUsersBySearchQuery(string query);
     }
 }

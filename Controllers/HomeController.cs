@@ -21,14 +21,14 @@ namespace HelloChat.Controllers
             _logger = logger;
             _homeService = homeService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(); 
             }
-            var model = await _homeService.GetConversationsViewModel(userId);
+            var model = await _homeService.GetConversationsViewModel(userId,id);
             
             return View(model);
         }

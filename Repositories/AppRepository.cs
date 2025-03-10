@@ -17,47 +17,59 @@ namespace HelloChat.Repositories
         {
             _context = context;
         }
-        public async Task<List<ConversationsViewModel>> GetConversationsAsync(string userGuid)
+        public async Task<HomeViewModel> GetHomeViewModelAsync(string CurrentUserId, string User2Id)
         {
-            var user = await _context.Users
-                .Where(u=>u.Id==userGuid)
-                .Include(u => u.FriendshipsInitiated)
+            var CurrentUser = await _context.Users
+                .Include(u=>u.FriendshipsInitiated)
                 .Include(u => u.FriendshipsReceived)
-                .FirstOrDefaultAsync();
-
-            var Friendships = user.FriendshipsInitiated.Concat(user.FriendshipsReceived);
-            List<ApplicationUser> users = [];
+                .FirstAsync(u => u.Id == CurrentUserId);
+            var User2 = await _context.Users.FirstOrDefaultAsync(u => u.Id == User2Id);
+            var Friendships = CurrentUser.FriendshipsInitiated.Concat(CurrentUser.FriendshipsReceived);
+            List<FriendsViewModel> FriendsList = [];
             foreach (var f in Friendships)
             {
-                if (f.User1Id == userGuid)
+                ApplicationUser user = null;
+                if (f.User1Id == CurrentUserId)
                 {
-                    var u = await _context.Users.Where(u => u.Id == f.User2Id).FirstAsync();
-                    users.Add(u);
+                    user = await _context.Users.Where(u => u.Id == f.User2Id).FirstAsync();
                 }
                 else
                 {
-                    var u = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
-                    users.Add(u);
+                    user = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
                 }
-            }
-            var messages = await _context.Messages
-                .Where(m => m.To_id == userGuid)
-                .ToListAsync();
-            var model = users.Select(user =>
-            {
-                var lastMessage = messages
-                    .FirstOrDefault(m => m.From_id == user.Id);
+                var Message = _context.Messages
+                    .Where(m=>m.To_id==CurrentUserId&&m.From_id==user.Id)
+                    .FirstOrDefault();
 
-                return new ConversationsViewModel
+                var FriendModel = new FriendsViewModel
                 {
+                    lastMessage = Message?.Content,
+                    Name = $"{user.FirstName} {user.LastName}",
                     ProfileImageUrl = "/images/blank-profile-picture.webp",
-                    lastMessage = lastMessage?.Content,
-                    Name = user.UserName,
-                    sentTime = lastMessage?.CreatedDate
+                    sentTime = Message?.CreatedDate,
+                    UserId = user.Id
                 };
-            }).ToList();
-
-            return model;
+                FriendsList.Add(FriendModel);
+            }
+            var Conversation = await _context.Conversation.Where(c=>(c.User1Id==CurrentUserId&&c.User2Id==User2Id)||
+            (c.User2Id == CurrentUserId && c.User1Id == User2Id)).FirstOrDefaultAsync();
+            if (Conversation == null&&!User2Id.IsNullOrEmpty())
+            {
+                Conversation = new Conversation
+                {
+                    Id = Guid.NewGuid(),
+                    User1Id = CurrentUserId,
+                    User2Id = User2Id,
+                };
+            }
+            return new HomeViewModel
+            {
+                CurrentConversationId = Conversation?.Id ?? Guid.Empty,
+                ProfilePicturePath = "/images/blank-profile-picture.webp",
+                Friends = FriendsList,
+                Messages = Conversation?.Messages ?? new List<Message>(),
+                Name = $"{User2?.FirstName} {User2?.LastName}",
+            };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {

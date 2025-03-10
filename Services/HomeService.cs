@@ -14,9 +14,9 @@ namespace HelloChat.Services
         {
             _repository = repository;
         }
-        public async Task<List<ConversationsViewModel>> GetConversationsViewModel(string CurrentUserId)
+        public async Task<HomeViewModel> GetConversationsViewModel(string CurrentUserId, string User2Id)
         {
-            return  await _repository.GetConversationsAsync(CurrentUserId);
+            return  await _repository.GetHomeViewModelAsync(CurrentUserId,User2Id);
         }
         public async Task<List<ApplicationUser>> GetIdentityUsersBySearchQuery(string query)
         {
