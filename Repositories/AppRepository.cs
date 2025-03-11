@@ -39,6 +39,7 @@ namespace HelloChat.Repositories
                 }
                 var Message = _context.Messages
                     .Where(m=>m.To_id==CurrentUserId&&m.From_id==user.Id)
+                    .OrderByDescending(m=>m.CreatedDate)
                     .FirstOrDefault();
 
                 var FriendModel = new FriendsViewModel
@@ -55,7 +56,8 @@ namespace HelloChat.Repositories
                 .Conversation
                 .Include(c=>c.Messages)
                 .Where(c=>(c.User1Id==CurrentUserId&&c.User2Id==User2Id)||
-            (c.User2Id == CurrentUserId && c.User1Id == User2Id)).FirstOrDefaultAsync();
+            (c.User2Id == CurrentUserId && c.User1Id == User2Id))
+                .FirstOrDefaultAsync();
             if (Conversation == null&&!User2Id.IsNullOrEmpty())
             {
                 Conversation = new Conversation
@@ -72,7 +74,7 @@ namespace HelloChat.Repositories
                 CurrentConversationId = Conversation?.Id ?? Guid.Empty,
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 Friends = FriendsList,
-                Messages = Conversation?.Messages ?? new List<Message>(),
+                Messages = Conversation?.Messages.OrderBy(m=>m.CreatedDate).ToList() ?? new List<Message>(),
                 Name = $"{User2?.FirstName} {User2?.LastName}",
                 SenderId = User2Id,
                 ReceiverId = CurrentUserId,

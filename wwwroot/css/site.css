@@ -70,6 +70,7 @@ h2 {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 90dvh;
 }
 
 .header {
@@ -101,6 +102,8 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    overflow-y: auto;
+    height: 100%;
 }
 
     .messages small {
