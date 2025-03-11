@@ -51,11 +51,23 @@ h2 {
         .hisory-chat-cards .item:hover {
             background-color: grey;
         }
-
+        .hisory-chat-cards .item div {
+            position: relative;
+        }
         .hisory-chat-cards .item img {
             width: 80px;
             height: 80px;
             border-radius: 50%;
+        }
+        .hisory-chat-cards .item .online-circle {
+            display: none;
+            position: absolute;
+            bottom: 1%;
+            left: 76%;
+            background-color: rgb(51, 232, 23);
+            border-radius: 100%;
+            width: 18px;
+            height: 18px;
         }
 
         .hisory-chat-cards .item h3,

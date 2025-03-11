@@ -29,12 +29,14 @@
 <div class="chat-history">
     <h2>Conversations</h2>
     <input type="text" class="chat-history-search">
-    <div class="hisory-chat-cards"">
+    <div class="hisory-chat-cards">
         @foreach (var item in Model.Friends)
             {
+                <input type="hidden" class="friend-id" value="@item.UserId" />
                 <div class="item" onclick="window.location.href='@Url.Action("Index", "Home", new { id = item.UserId })'">
                     <div>
                         <img src="@item.ProfileImageUrl" alt="profile-picture">
+                        <div class="online-circle" id="@item.UserId"></div>
                     </div>
                     <div>
                         <h3 class="profile-name">@item.Name</h3>

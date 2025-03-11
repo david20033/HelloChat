@@ -208,5 +208,28 @@ namespace HelloChat.Repositories
             await _context.Messages.AddAsync(Message);
             await _context.SaveChangesAsync();
         }
+        public async Task<List<string>> GetUserFriendIds(string UserId)
+        {
+            var user = await _context.Users
+                .Include(u => u.FriendshipsInitiated)
+                .Include(u => u.FriendshipsReceived)
+                .FirstAsync(u => u.Id == UserId);
+            var Friendships = user.FriendshipsInitiated.Concat(user.FriendshipsReceived);
+            List<string> FriendsList = [];
+            foreach (var f in Friendships)
+            {
+                ApplicationUser us = null;
+                if (f.User1Id == UserId)
+                {
+                    us = await _context.Users.Where(u => u.Id == f.User2Id).FirstAsync();
+                }
+                else
+                {
+                    us = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
+                }
+                FriendsList.Add(us.Id);
+            }
+            return FriendsList;
+        }
     }
 }

@@ -16,5 +16,6 @@ namespace HelloChat.Repositories.IRepositories
         Task AcceptFriendRequest(string FromId, string ToId);
 
         Task SendMessage(string FromId, string ToId, string Content);
+        Task<List<string>> GetUserFriendIds(string UserId);
     }
 }
