@@ -1,13 +1,28 @@
 ﻿
 using System.Security.Claims;
+using HelloChat.Data;
+using HelloChat.Repositories;
+using HelloChat.Repositories.IRepositories;
 using Microsoft.AspNetCore.SignalR;
 namespace HelloChat.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string ReceiverUserId, string message)
+        private readonly IAppRepository _repository;
+
+        public ChatHub(IAppRepository repository) 
         {
-            await Clients.User(ReceiverUserId).SendAsync("ReceiveMessage", message);
+            _repository = repository;
+        }
+        public async Task SendMessage(string FromId, string ToId, string message)
+        {
+            await _repository.SendMessage(FromId, ToId, message);
+            await Clients.Users(FromId, ToId).SendAsync("ReceiveMessage", FromId, ToId, message);
+            //await Clients.All.SendAsync("ReceiveMessage", FromId, ToId, message);
+        }
+        public async Task GetCurrentUser(string UserId)
+        {
+
         }
         public override Task OnConnectedAsync()
         {

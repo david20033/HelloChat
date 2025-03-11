@@ -29,21 +29,21 @@ namespace HelloChat.Controllers
                 return Unauthorized(); 
             }
             var model = await _homeService.GetConversationsViewModel(userId,id);
-            
+            ViewBag.FromId = userId;
             return View(model);
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendMessage(string ToId, string Content)
-        {
-            var FromId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(FromId))
-            {
-                return Unauthorized();
-            }
-            await _homeService.SendMessage(FromId,ToId,Content);
-            return RedirectToAction("Index", new { id = ToId });
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> SendMessage(string ToId, string Content)
+        //{
+        //    var FromId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    if (string.IsNullOrEmpty(FromId))
+        //    {
+        //        return Unauthorized();
+        //    }
+        //    await _homeService.SendMessage(FromId,ToId,Content);
+        //    return RedirectToAction("Index", new { id = ToId });
+        //}
         public async Task<IActionResult> SearchUsers( string query)
         {
             if (string.IsNullOrEmpty(query))

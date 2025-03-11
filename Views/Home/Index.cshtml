@@ -59,7 +59,7 @@
             <p class="last-active">Active 1 hour ago</p>
         </div>
     </div>
-    <div class="messages">
+        <div class="messages" id="messages">
         <small>06.03 14:49</small>
         @foreach(var m in Model.Messages)
         {
@@ -76,9 +76,10 @@
     </div>
         <form id="friendRequestForm" asp-controller="Home" asp-action="SendMessage" method="post">
             <div class="bottom">
-                <input type="text" name="Content">
-                <input type="hidden" name="ToId" value="@Model.SenderId">
-                <button type="submit">
+                <input type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
+                <input type="hidden" id="ToId" name="ToId" value="@Model.SenderId">
+                <input type="hidden" id="FromId"  value="@ViewBag.FromId">
+                <button type="submit" id="sendButton">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                     </svg>
