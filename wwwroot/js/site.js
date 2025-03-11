@@ -19,6 +19,9 @@ connection.on("ReceiveMessage", function (FromId, ToId, message) {
 
     p.textContent = message;
     document.getElementById("messages").appendChild(p);
+
+    var messagesDiv = document.getElementById("messages");
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
 connection.start().then(function () {
@@ -35,4 +38,9 @@ document.getElementById("sendButton").addEventListener("click", function (event)
         return console.error(err.toString());
     });
     event.preventDefault();
+});
+//another js
+window.addEventListener("load", function () {
+    var messagesDiv = document.getElementById("messages");
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
