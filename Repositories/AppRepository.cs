@@ -48,7 +48,8 @@ namespace HelloChat.Repositories
                     Name = $"{user.FirstName} {user.LastName}",
                     ProfileImageUrl = "/images/blank-profile-picture.webp",
                     sentTime = Message?.CreatedDate,
-                    UserId = user.Id
+                    UserId = user.Id,
+                    ConversationId = Message?.ConversationId
                 };
                 FriendsList.Add(FriendModel);
             }

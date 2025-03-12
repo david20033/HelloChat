@@ -7,5 +7,6 @@
         public string? lastMessage { get; set; }
         public DateTime? sentTime { get; set; }
         public string UserId { get; set; }
+        public Guid? ConversationId { get; set; }
     }
 }

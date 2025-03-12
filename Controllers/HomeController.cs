@@ -21,7 +21,7 @@ namespace HelloChat.Controllers
             _logger = logger;
             _homeService = homeService;
         }
-        public async Task<IActionResult> Index(string id)
+        public async Task<IActionResult> Index(string id, string conversationId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -29,6 +29,10 @@ namespace HelloChat.Controllers
                 return Unauthorized(); 
             }
             var model = await _homeService.GetConversationsViewModel(userId,id);
+            if (conversationId != null)
+            {
+                model.CurrentConversationId = Guid.Parse(conversationId);
+            }
             ViewBag.FromId = userId;
             return View(model);
         }

@@ -1,4 +1,5 @@
 ﻿
+using System.Reflection.Metadata;
 using System.Security.Claims;
 using HelloChat.Data;
 using HelloChat.Repositories;
@@ -10,6 +11,7 @@ namespace HelloChat.Hubs
     {
         private readonly IAppRepository _repository;
         private static readonly List<string> _onlineUsers = [];
+        private static readonly Dictionary<string,string> _currentUserConversation = [];
 
         public ChatHub(IAppRepository repository) 
         {
@@ -18,12 +20,40 @@ namespace HelloChat.Hubs
         public async Task SendMessage(string FromId, string ToId, string message)
         {
             await _repository.SendMessage(FromId, ToId, message);
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            if (CurrConversation == null|| CurrConversation!= ToUserConversation)
+            {
+                await Clients.Users(FromId, ToId).SendAsync("OnlySendMessage", FromId, ToId, message);
+                return;
+            }
             await Clients.Users(FromId, ToId).SendAsync("ReceiveMessage", FromId, ToId, message);
-            //await Clients.All.SendAsync("ReceiveMessage", FromId, ToId, message);
         }
-        public async Task GetCurrentUser(string UserId)
+        public async Task SendTyping(string FromId, string ToId)
         {
-
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveTyping");
+        }
+        private  string? GetCurrentUserConversation(string UserId)
+        {
+            _currentUserConversation.TryGetValue(UserId, out var conversation);
+            return conversation;
+        }
+        public void SetCurrentUserConversation(string UserId, string ConversationId)
+        {
+            if(_currentUserConversation.ContainsKey(UserId))
+            {
+                _currentUserConversation[UserId] = ConversationId;
+            }
+            else
+            {
+                _currentUserConversation.Add(UserId, ConversationId);
+            }
         }
         public override Task OnConnectedAsync()
         {

@@ -24,6 +24,22 @@ connection.on("ReceiveMessage", function (FromId, ToId, message) {
     var messagesDiv = document.getElementById("messages");
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+connection.on("OnlySendMessage", function (FromId, ToId, message) {
+    var currentUserId = document.getElementById("FromId").value;
+
+    var p = document.createElement("p");
+    p.classList.add("message-balon");
+    p.classList.add("message-from");
+
+    p.textContent = message;
+    document.getElementById("messages").appendChild(p);
+
+    var messagesDiv = document.getElementById("messages");
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+connection.on("ReceiveTyping", function () {
+    alert("Typing...");
+});
 connection.on("OnlineUsers", function (OnlineFriendIds)
 {
     OnlineFriendIds.forEach(function (id) {
@@ -49,7 +65,21 @@ connection.start().then(function () {
 }).catch(function (err) {
     return console.error(err.toString());
 });
+document.getElementById("ConversationChanger").addEventListener("click", function (event) {
+    var UserId = currentUserId;
+    var ConversationId = document.getElementById("conversation-id").value;
+    connection.invoke("SetCurrentUserConversation", UserId, ConversationId).catch(function (err) {
+        return console.error(err.toString());
+    });
+})
 
+document.getElementById("Content").addEventListener("input", function (event) {
+    var ToId = document.getElementById("ToId").value;
+    var FromId = document.getElementById("FromId").value;
+    connection.invoke("SendTyping", FromId, ToId).catch(function (err) {
+        return console.error(err.toString());
+    });
+})
 document.getElementById("sendButton").addEventListener("click", function (event) {
     var message = document.getElementById("Content").value;
     var ToId = document.getElementById("ToId").value;

@@ -33,8 +33,9 @@
         @foreach (var item in Model.Friends)
             {
                 <input type="hidden" class="friend-id" value="@item.UserId" />
-                <div class="item" onclick="window.location.href='@Url.Action("Index", "Home", new { id = item.UserId })'">
+                <div class="item" id="ConversationChanger" onclick="window.location.href='@Url.Action("Index", "Home", new { id = item.UserId, conversationId = item.ConversationId })'">
                     <div>
+                        <input type="hidden" id="conversation-id" class="conversation-id" value="@item.ConversationId" />
                         <img src="@item.ProfileImageUrl" alt="profile-picture">
                         <div class="online-circle" id="@item.UserId"></div>
                     </div>
