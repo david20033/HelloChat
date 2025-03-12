@@ -39,6 +39,16 @@ namespace HelloChat.Hubs
             }
             await Clients.User(ToId).SendAsync("ReceiveTyping");
         }
+        public async Task SendStopTyping(string FromId,string ToId)
+        {
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveStopTyping");
+        }
         private  string? GetCurrentUserConversation(string UserId)
         {
             _currentUserConversation.TryGetValue(UserId, out var conversation);
