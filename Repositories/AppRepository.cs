@@ -53,12 +53,7 @@ namespace HelloChat.Repositories
                 };
                 FriendsList.Add(FriendModel);
             }
-            var Conversation = await _context
-                .Conversation
-                .Include(c=>c.Messages)
-                .Where(c=>(c.User1Id==CurrentUserId&&c.User2Id==User2Id)||
-            (c.User2Id == CurrentUserId && c.User1Id == User2Id))
-                .FirstOrDefaultAsync();
+            var Conversation = await GetConversationAsync(CurrentUserId, User2Id);
             if (Conversation == null&&!User2Id.IsNullOrEmpty())
             {
                 Conversation = new Conversation
@@ -190,9 +185,7 @@ namespace HelloChat.Repositories
         }
         public async Task SendMessage (string FromId, string ToId,string Content)
         {
-            var Conversation = await _context.Conversation
-                .FirstOrDefaultAsync(c => (c.User1Id == FromId && c.User2Id == ToId)
-                || (c.User2Id == FromId && c.User1Id == ToId));
+            var Conversation = await GetConversationAsync(FromId, ToId);
             var Message = new Message
             {
                 Id = Guid.NewGuid(),
@@ -231,6 +224,12 @@ namespace HelloChat.Repositories
                 FriendsList.Add(us.Id);
             }
             return FriendsList;
+        }
+        private async Task<Conversation?> GetConversationAsync(string User1Id, string User2Id)
+        {
+            return await _context.Conversation
+                .FirstOrDefaultAsync(c => (c.User1Id == User1Id && c.User2Id == User2Id)
+                || (c.User2Id == User1Id && c.User1Id == User2Id));
         }
     }
 }
