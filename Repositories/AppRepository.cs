@@ -41,7 +41,6 @@ namespace HelloChat.Repositories
                     .Where(m=>m.To_id==CurrentUserId&&m.From_id==user.Id)
                     .OrderByDescending(m=>m.CreatedDate)
                     .FirstOrDefault();
-
                 var FriendModel = new FriendsViewModel
                 {
                     lastMessage = Message?.Content,
@@ -51,6 +50,23 @@ namespace HelloChat.Repositories
                     UserId = user.Id,
                     ConversationId = Message?.ConversationId
                 };
+                if (await GetConversationAsync(CurrentUserId,user.Id)==null)
+                {
+                    var el = new Conversation
+                    {
+                        Id = Guid.NewGuid(),
+                        User1Id = CurrentUserId,
+                        User2Id = user.Id,
+                    };
+                    FriendModel.ConversationId= el.Id;
+                    await _context.Conversation.AddAsync(el);
+                    await _context.SaveChangesAsync();
+                } 
+                else if (FriendModel.ConversationId == null)
+                {
+                    var el = await GetConversationAsync(CurrentUserId, user.Id);
+                    FriendModel.ConversationId = el?.Id;
+                }
                 FriendsList.Add(FriendModel);
             }
             var Conversation = await GetConversationAsync(CurrentUserId, User2Id);
@@ -228,8 +244,50 @@ namespace HelloChat.Repositories
         private async Task<Conversation?> GetConversationAsync(string User1Id, string User2Id)
         {
             return await _context.Conversation
+                .Include(c=>c.Messages)
                 .FirstOrDefaultAsync(c => (c.User1Id == User1Id && c.User2Id == User2Id)
                 || (c.User2Id == User1Id && c.User1Id == User2Id));
+        }
+        public async Task SetSeenToLastMessage(string UserId, Guid ConversationId)
+        {
+            var Conversation = await _context
+                .Conversation
+                .Include(c=>c.Messages)
+                .FirstAsync(c => c.Id == ConversationId);
+            var lastMessage = Conversation
+                .Messages
+                .OrderByDescending(m => m.CreatedDate)
+                .FirstOrDefault();
+            if (lastMessage?.From_id == UserId||lastMessage==null) return;
+            lastMessage.isSeen = true;
+            await _context.SaveChangesAsync();
+        }
+        public async Task<bool> isLastMessageSeen(string UserId, Guid ConversationId)
+        {
+            var Conversation = await _context
+                .Conversation
+                .Include(c => c.Messages)
+                .FirstAsync(c => c.Id == ConversationId);
+            var lastMessage = Conversation
+                .Messages
+                .OrderByDescending(m => m.CreatedDate)
+                .FirstOrDefault();
+            if ( lastMessage == null) return false;
+            return lastMessage.isSeen;
+        }
+        public async Task<string> GetAnotherUserIdInConversationAsync(string UserId, Guid ConversationId)
+        {
+            var Conversation = await _context
+                .Conversation
+                .FirstAsync(c => c.Id == ConversationId);
+            if (Conversation.User1Id == UserId)
+            {
+                return Conversation.User2Id;
+            }
+            else
+            {
+                return Conversation.User1Id;
+            }
         }
     }
 }

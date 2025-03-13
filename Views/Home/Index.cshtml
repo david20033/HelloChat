@@ -30,26 +30,27 @@
     <h2>Conversations</h2>
     <input type="text" class="chat-history-search">
     <div class="hisory-chat-cards">
-        @foreach (var item in Model.Friends)
+            @foreach (var item in Model.Friends)
             {
                 <input type="hidden" class="friend-id" value="@item.UserId" />
-                <div class="item" id="ConversationChanger" onclick="window.location.href='@Url.Action("Index", "Home", new { id = item.UserId, conversationId = item.ConversationId })'">
+                <div class="item ConversationChanger" data-user-id="@item.UserId" data-conversation-id="@item.ConversationId">
                     <div>
-                        <input type="hidden" id="conversation-id" class="conversation-id" value="@item.ConversationId" />
                         <img src="@item.ProfileImageUrl" alt="profile-picture">
                         <div class="online-circle" id="@item.UserId"></div>
                     </div>
                     <div>
                         <h3 class="profile-name">@item.Name</h3>
-                        @if(item.lastMessage==null){
+                        @if (item.lastMessage == null)
+                        {
                             <p class="last-message">No messages</p>
                         }
-                        else{
+                        else
+                        {
                             <p class="last-message">@item.lastMessage . @item.sentTime</p>
                         }
                     </div>
                 </div>
-		    }
+            }
     </div>
 </div>
 <div class="chat-box">
@@ -74,11 +75,6 @@
                 <p class="message-from message-balon">@m.Content</p>
             }
         }
-            <p id="TypingBalon" class="message-balon message-to typing">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </p>
 @*         <p class="message-from message-balon">when</p>
         <p class="message-to message-balon">this toster</p> *@
     </div>

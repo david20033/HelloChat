@@ -8,17 +8,10 @@ const doneTypingInterval = 1000;
 //Disable the send button until connection is established.
 document.getElementById("sendButton").disabled = true;
 
-connection.on("ReceiveMessage", function (FromId, ToId, message) {
-    var currentUserId = document.getElementById("FromId").value;
-
+connection.on("ReceiveMessage", function (message) {
     var p = document.createElement("p");
     p.classList.add("message-balon");
-
-    if (FromId === currentUserId) {
-        p.classList.add("message-from"); 
-    } else {
-        p.classList.add("message-to"); 
-    }
+    p.classList.add("message-to");
 
     p.textContent = message;
     document.getElementById("messages").appendChild(p);
@@ -26,8 +19,7 @@ connection.on("ReceiveMessage", function (FromId, ToId, message) {
     var messagesDiv = document.getElementById("messages");
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
-connection.on("OnlySendMessage", function (FromId, ToId, message) {
-    var currentUserId = document.getElementById("FromId").value;
+connection.on("SendMessage", function (message) {
 
     var p = document.createElement("p");
     p.classList.add("message-balon");
@@ -87,6 +79,9 @@ connection.on("FriendConnected", function (userId) {
     var userDiv = document.getElementById(userId);
     userDiv.style.display = "inline";
 });
+connection.on("ReceiveSeen", function () {
+    alert("Seen");
+});
 
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
@@ -96,13 +91,22 @@ connection.start().then(function () {
 }).catch(function (err) {
     return console.error(err.toString());
 });
-document.getElementById("ConversationChanger").addEventListener("click", function (event) {
-    var UserId = currentUserId;
-    var ConversationId = document.getElementById("conversation-id").value;
-    connection.invoke("SetCurrentUserConversation", UserId, ConversationId).catch(function (err) {
-        return console.error(err.toString());
+document.querySelectorAll(".ConversationChanger").forEach(function (element) {
+    element.addEventListener("click", function (event) {
+
+        var userId = this.getAttribute("data-user-id");
+        var conversationId = this.getAttribute("data-conversation-id");
+
+        connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
+            .then(function () {
+                window.location.href = "/Home/Index?id=" + userId;
+            })
+            .catch(function (err) {
+                console.error(err.toString());
+            });
     });
-})
+});
+
 
 document.getElementById("Content").addEventListener("input", function (event) {
     clearTimeout(typingTimer);

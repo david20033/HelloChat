@@ -22,12 +22,13 @@ namespace HelloChat.Hubs
             await _repository.SendMessage(FromId, ToId, message);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
+            await Clients.User(FromId).SendAsync("SendMessage", message);
             if (CurrConversation == null|| CurrConversation!= ToUserConversation)
             {
-                await Clients.Users(FromId, ToId).SendAsync("OnlySendMessage", FromId, ToId, message);
                 return;
             }
-            await Clients.Users(FromId, ToId).SendAsync("ReceiveMessage", FromId, ToId, message);
+            await Clients.User(ToId).SendAsync("ReceiveMessage",message);
+            await Clients.User(FromId).SendAsync("ReceiveSeen");
         }
         public async Task SendTyping(string FromId, string ToId)
         {
@@ -54,7 +55,7 @@ namespace HelloChat.Hubs
             _currentUserConversation.TryGetValue(UserId, out var conversation);
             return conversation;
         }
-        public void SetCurrentUserConversation(string UserId, string ConversationId)
+        public async Task SetCurrentUserConversation(string UserId, string ConversationId)
         {
             if(_currentUserConversation.ContainsKey(UserId))
             {
@@ -63,6 +64,16 @@ namespace HelloChat.Hubs
             else
             {
                 _currentUserConversation.Add(UserId, ConversationId);
+            }
+            var isSeen = await _repository.isLastMessageSeen(UserId, Guid.Parse(ConversationId));
+            if (isSeen) return;
+            await _repository.SetSeenToLastMessage(UserId, Guid.Parse(ConversationId));
+            var OtherUserId = await _repository
+                .GetAnotherUserIdInConversationAsync(UserId, Guid.Parse(ConversationId));
+            if(!_currentUserConversation.TryGetValue(OtherUserId, out var currentID)) return;
+            if (currentID == ConversationId)
+            {
+                await Clients.User(OtherUserId).SendAsync("ReceiveSeen");
             }
         }
         public override Task OnConnectedAsync()
