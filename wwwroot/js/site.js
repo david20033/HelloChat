@@ -156,3 +156,21 @@ window.addEventListener("load", function () {
     var messagesDiv = document.getElementById("messages");
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
+document.querySelectorAll(".message-row").forEach(function (element) {
+    element.addEventListener("mouseenter", function () {
+        const options = element.querySelectorAll(".message-options");
+        if (options) {
+            options[0].style.display = "block";
+            options[1].style.display = "block";
+        }
+    });
+
+    element.addEventListener("mouseleave", function () {
+        const options = element.querySelectorAll(".message-options");
+        if (options) {
+            options[0].style.display = "none";
+            options[1].style.display = "none";
+        }
+    });
+});
