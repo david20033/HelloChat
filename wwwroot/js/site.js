@@ -111,6 +111,11 @@ connection.on("ReceiveGlobalDeleteMessage", function (MessageId) {
     var parentDiv = message.parentElement;
     parentDiv.classList.add("no-click");
 });
+connection.on("ReceiveLocalDeleteMessage", function (MessageId) {
+    var message = document.getElementById(MessageId);
+    var parentDiv = message.parentElement;
+    parentDiv.style.display = "none";
+});
 
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
@@ -169,6 +174,21 @@ document.querySelectorAll(".message-row").forEach(function (element) {
                 var ToId = document.getElementById("ToId").value;
                 var FromId = document.getElementById("FromId").value;
                 connection.invoke("SendGlobalDeleteMessage",FromId,ToId, MessageId).catch(function (err) {
+                    console.error(err.toString());
+                });
+            }
+        });
+    }
+});
+document.querySelectorAll(".message-row").forEach(function (element) {
+    const deleteBtn = element.querySelector(".message-options.deleteSenderMessage");
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", function () {
+            const messageBalon = element.querySelector(".message-balon");
+            if (messageBalon) {
+                const MessageId = messageBalon.id;
+                var FromId = document.getElementById("FromId").value;
+                connection.invoke("SendLocalDeleteMessage", FromId, MessageId).catch(function (err) {
                     console.error(err.toString());
                 });
             }

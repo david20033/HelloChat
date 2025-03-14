@@ -21,5 +21,7 @@ namespace HelloChat.Repositories.IRepositories
         Task<string> GetAnotherUserIdInConversationAsync(string UserId, Guid ConversationId);
         Task<bool> isLastMessageSeen(string UserId, Guid ConversationId);
         Task DeleteMessageContent(Guid MessageId);
+
+        Task SetLocalDeleted(Guid MessageId);
     }
 }

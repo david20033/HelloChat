@@ -63,6 +63,11 @@ namespace HelloChat.Hubs
             }
             await Clients.User(ToId).SendAsync("ReceiveGlobalDeleteMessage", MessageId);
         }
+        public async Task SendLocalDeleteMessage(string FromId, string MessageId)
+        {
+            await _repository.SetLocalDeleted(Guid.Parse(MessageId));
+            await Clients.User(FromId).SendAsync("ReceiveLocalDeleteMessage", MessageId);
+        }
         private  string? GetCurrentUserConversation(string UserId)
         {
             _currentUserConversation.TryGetValue(UserId, out var conversation);

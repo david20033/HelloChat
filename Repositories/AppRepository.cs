@@ -310,5 +310,12 @@ namespace HelloChat.Repositories
             message.isDeleted = true;
             await _context.SaveChangesAsync();
         }
+        public async Task SetLocalDeleted(Guid MessageId)
+        {
+            var message = await _context.Messages.Where(m => m.Id == MessageId).FirstOrDefaultAsync();
+            if (message == null) return;
+            message.isLocalDeleted = true;
+            await _context.SaveChangesAsync();
+        }
     }
 }
