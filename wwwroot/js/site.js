@@ -104,6 +104,14 @@ connection.on("ReceiveSeen", function (messageId) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
+connection.on("ReceiveGlobalDeleteMessage", function (MessageId) {
+    var message = document.getElementById(MessageId);
+    message.classList.add("message-removed");
+    message.innerText = "Message Removed";
+    var parentDiv = message.parentElement;
+    parentDiv.classList.add("no-click");
+});
+
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
     connection.invoke("GetOnlineUsers", friendIds).catch(function (err) {
@@ -151,6 +159,23 @@ document.getElementById("sendButton").addEventListener("click", function (event)
     });
     event.preventDefault();
 });
+document.querySelectorAll(".message-row").forEach(function (element) {
+    const deleteBtn = element.querySelector(".message-options.deleteOwnMessage");
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", function () {
+            const messageBalon = element.querySelector(".message-balon");
+            if (messageBalon) {
+                const MessageId = messageBalon.id;
+                var ToId = document.getElementById("ToId").value;
+                var FromId = document.getElementById("FromId").value;
+                connection.invoke("SendGlobalDeleteMessage",FromId,ToId, MessageId).catch(function (err) {
+                    console.error(err.toString());
+                });
+            }
+        });
+    }
+});
+
 //another js
 window.addEventListener("load", function () {
     var messagesDiv = document.getElementById("messages");

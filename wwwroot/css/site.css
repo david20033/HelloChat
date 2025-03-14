@@ -157,6 +157,13 @@ h2 {
     background-color: #eceaea;
     order: 1;
 }
+.message-removed {
+    color: #999;
+    text-decoration: line-through;
+}
+.no-click {
+    pointer-events: none;
+}
 .message-options {
     display:none;
     order: 2;

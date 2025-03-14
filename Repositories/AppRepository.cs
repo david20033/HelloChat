@@ -302,5 +302,13 @@ namespace HelloChat.Repositories
                 return Conversation.User1Id;
             }
         }
+        public async Task DeleteMessageContent(Guid MessageId)
+        {
+            var message=await _context.Messages.Where(m=>m.Id==MessageId).FirstOrDefaultAsync();
+            if(message == null) return;
+            message.Content = "Message Removed";
+            message.isDeleted = true;
+            await _context.SaveChangesAsync();
+        }
     }
 }

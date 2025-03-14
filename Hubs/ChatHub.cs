@@ -51,6 +51,18 @@ namespace HelloChat.Hubs
             }
             await Clients.User(ToId).SendAsync("ReceiveStopTyping");
         }
+        public async Task SendGlobalDeleteMessage(string FromId, string ToId,string MessageId)
+        {
+            await _repository.DeleteMessageContent(Guid.Parse(MessageId));
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            await Clients.User(FromId).SendAsync("ReceiveGlobalDeleteMessage",MessageId);
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveGlobalDeleteMessage", MessageId);
+        }
         private  string? GetCurrentUserConversation(string UserId)
         {
             _currentUserConversation.TryGetValue(UserId, out var conversation);
