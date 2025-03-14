@@ -128,6 +128,8 @@ h2 {
         padding: 20px;
         width: fit-content;
         border-radius: 20px;
+        position: relative;
+        margin-bottom: 1.5rem;
     }
 
     .messages .message-from {
@@ -184,6 +186,19 @@ h2 {
         transform: scale(1.4);
         opacity: 1;
     }
+}
+
+.messages .seen-time {
+    position: absolute;
+    top: 100%; 
+    right: 15px; 
+    font-size: 0.95rem;
+    color: #999;
+    padding-top: 4px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    margin-bottom:10px;
 }
 
 .chat-box .bottom {

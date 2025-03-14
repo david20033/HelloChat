@@ -81,6 +81,15 @@ namespace HelloChat.Repositories
                 await _context.Conversation.AddAsync(Conversation);
                 await _context.SaveChangesAsync();
             }
+            Message? lastSeenMessage = null;
+            if (!User2Id.IsNullOrEmpty())
+            {
+                lastSeenMessage = Conversation
+                    .Messages
+                    .Where(m => m.isSeen == true && m.To_id == User2Id)
+                    .OrderByDescending(m => m.SeenTime)
+                    .FirstOrDefault();
+            }
             return new HomeViewModel
             {
                 CurrentConversationId = Conversation?.Id ?? Guid.Empty,
@@ -90,6 +99,7 @@ namespace HelloChat.Repositories
                 Name = $"{User2?.FirstName} {User2?.LastName}",
                 SenderId = User2Id,
                 ReceiverId = CurrentUserId,
+                LastSeenMessageId=lastSeenMessage?.Id,
             };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
@@ -199,7 +209,7 @@ namespace HelloChat.Repositories
             await _context.Friendship.AddAsync(Frienship);
             await _context.SaveChangesAsync();
         }
-        public async Task SendMessage (string FromId, string ToId,string Content)
+        public async Task<Guid> SendMessageAndReturnItsId (string FromId, string ToId,string Content)
         {
             var Conversation = await GetConversationAsync(FromId, ToId);
             var Message = new Message
@@ -217,6 +227,7 @@ namespace HelloChat.Repositories
             };
             await _context.Messages.AddAsync(Message);
             await _context.SaveChangesAsync();
+            return Message.Id;
         }
         public async Task<List<string>> GetUserFriendIds(string UserId)
         {
@@ -248,7 +259,7 @@ namespace HelloChat.Repositories
                 .FirstOrDefaultAsync(c => (c.User1Id == User1Id && c.User2Id == User2Id)
                 || (c.User2Id == User1Id && c.User1Id == User2Id));
         }
-        public async Task SetSeenToLastMessage(string UserId, Guid ConversationId)
+        public async Task<Guid> SetSeenToLastMessageAndReturnItsId(string UserId, Guid ConversationId)
         {
             var Conversation = await _context
                 .Conversation
@@ -258,9 +269,11 @@ namespace HelloChat.Repositories
                 .Messages
                 .OrderByDescending(m => m.CreatedDate)
                 .FirstOrDefault();
-            if (lastMessage?.From_id == UserId||lastMessage==null) return;
+            if (lastMessage?.From_id == UserId||lastMessage==null) return Guid.Empty;
             lastMessage.isSeen = true;
+            lastMessage.SeenTime = DateTime.Now;
             await _context.SaveChangesAsync();
+            return lastMessage.Id;
         }
         public async Task<bool> isLastMessageSeen(string UserId, Guid ConversationId)
         {

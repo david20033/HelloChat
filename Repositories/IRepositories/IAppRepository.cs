@@ -15,9 +15,9 @@ namespace HelloChat.Repositories.IRepositories
 
         Task AcceptFriendRequest(string FromId, string ToId);
 
-        Task SendMessage(string FromId, string ToId, string Content);
+        Task<Guid> SendMessageAndReturnItsId(string FromId, string ToId, string Content);
         Task<List<string>> GetUserFriendIds(string UserId);
-        Task SetSeenToLastMessage(string UserId, Guid ConversationId);
+        Task<Guid> SetSeenToLastMessageAndReturnItsId(string UserId, Guid ConversationId);
         Task<string> GetAnotherUserIdInConversationAsync(string UserId, Guid ConversationId);
         Task<bool> isLastMessageSeen(string UserId, Guid ConversationId);
     }

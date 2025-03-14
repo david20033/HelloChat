@@ -19,16 +19,17 @@ namespace HelloChat.Hubs
         }
         public async Task SendMessage(string FromId, string ToId, string message)
         {
-            await _repository.SendMessage(FromId, ToId, message);
+            var messageId = await _repository.SendMessageAndReturnItsId(FromId, ToId, message);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
-            await Clients.User(FromId).SendAsync("SendMessage", message);
+            await Clients.User(FromId).SendAsync("SendMessage",messageId, message);
             if (CurrConversation == null|| CurrConversation!= ToUserConversation)
             {
                 return;
             }
-            await Clients.User(ToId).SendAsync("ReceiveMessage",message);
-            await Clients.User(FromId).SendAsync("ReceiveSeen");
+            await Clients.User(ToId).SendAsync("ReceiveMessage",messageId, message);
+            await _repository.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
+            await Clients.User(FromId).SendAsync("ReceiveSeen",messageId);
         }
         public async Task SendTyping(string FromId, string ToId)
         {
@@ -67,13 +68,13 @@ namespace HelloChat.Hubs
             }
             var isSeen = await _repository.isLastMessageSeen(UserId, Guid.Parse(ConversationId));
             if (isSeen) return;
-            await _repository.SetSeenToLastMessage(UserId, Guid.Parse(ConversationId));
+            var messageId = await _repository.SetSeenToLastMessageAndReturnItsId(UserId, Guid.Parse(ConversationId));
             var OtherUserId = await _repository
                 .GetAnotherUserIdInConversationAsync(UserId, Guid.Parse(ConversationId));
             if(!_currentUserConversation.TryGetValue(OtherUserId, out var currentID)) return;
             if (currentID == ConversationId)
             {
-                await Clients.User(OtherUserId).SendAsync("ReceiveSeen");
+                await Clients.User(OtherUserId).SendAsync("ReceiveSeen", messageId);
             }
         }
         public override Task OnConnectedAsync()

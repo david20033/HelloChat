@@ -24,7 +24,7 @@ namespace HelloChat.Services
         }
         public async Task SendMessage(string FromId, string ToId, string Content)
         {
-            await _repository.SendMessage(FromId,ToId,Content);
+            await _repository.SendMessageAndReturnItsId(FromId,ToId,Content);
         }
     }
 }

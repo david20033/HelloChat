@@ -8,24 +8,28 @@ const doneTypingInterval = 1000;
 //Disable the send button until connection is established.
 document.getElementById("sendButton").disabled = true;
 
-connection.on("ReceiveMessage", function (message) {
+connection.on("ReceiveMessage", function (messageId, message) {
+    var messageEl = document.getElementById("TypingBalon");
+    messageEl.remove();
     var p = document.createElement("p");
     p.classList.add("message-balon");
     p.classList.add("message-to");
 
     p.textContent = message;
+    p.id = messageId;
     document.getElementById("messages").appendChild(p);
 
     var messagesDiv = document.getElementById("messages");
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
-connection.on("SendMessage", function (message) {
+connection.on("SendMessage", function (messageId, message) {
 
     var p = document.createElement("p");
     p.classList.add("message-balon");
     p.classList.add("message-from");
 
     p.textContent = message;
+    p.id = messageId;
     document.getElementById("messages").appendChild(p);
 
     var messagesDiv = document.getElementById("messages");
@@ -36,8 +40,7 @@ connection.on("ReceiveTyping", function () {
         return;
     }
     const chatContainer = document.getElementsByClassName("messages")[0];
-    //messageEl.style.display = "flex";
-    //messageEl.classList.remove("hidden");
+
     var p = document.createElement("p");
     p.classList.add("message-balon");
     p.classList.add("message-to");
@@ -79,8 +82,26 @@ connection.on("FriendConnected", function (userId) {
     var userDiv = document.getElementById(userId);
     userDiv.style.display = "inline";
 });
-connection.on("ReceiveSeen", function () {
-    alert("Seen");
+connection.on("ReceiveSeen", function (messageId) {
+    const elements = document.querySelectorAll(".seen-time");
+    const lastElement = elements[elements.length - 1];
+    if (lastElement) {
+        lastElement.remove();
+    }
+    var message = document.getElementById(messageId);
+    var small = document.createElement("small");
+    small.classList.add("seen-time");
+    var strong = document.createElement("strong");
+    strong.innerText = "Read";
+    small.appendChild(strong);
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTime = `${hours}:${minutes}`;
+    small.appendChild(document.createTextNode(" "+currentTime));
+    message.appendChild(small);
+    var messagesDiv = document.getElementById("messages");
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
 connection.start().then(function () {

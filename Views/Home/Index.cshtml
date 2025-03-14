@@ -67,12 +67,19 @@
         <small>06.03 14:49</small>
         @foreach(var m in Model.Messages)
         {
+            if(m.Id==Model.LastSeenMessageId){
+                    <p class="message-from message-balon" id="@m.Id">
+                        @m.Content
+                        <small class="seen-time"><strong>Read</strong> @(m.SeenTime.HasValue ? m.SeenTime.Value.ToString("HH:mm") : "")</small>
+                    </p>
+                    continue;
+            }
             if(Model.SenderId==m.From_id){
-                    <p class="message-to message-balon">@m.Content</p>
+                    <p class="message-to message-balon" id="@m.Id">@m.Content</p>
             }
             if (Model.ReceiverId == m.From_id)
             {
-                <p class="message-from message-balon">@m.Content</p>
+                    <p class="message-from message-balon" id="@m.Id">@m.Content</p>
             }
         }
 @*         <p class="message-from message-balon">when</p>
