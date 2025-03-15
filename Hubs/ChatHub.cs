@@ -2,6 +2,7 @@
 using System.Reflection.Metadata;
 using System.Security.Claims;
 using HelloChat.Data;
+using HelloChat.Enums;
 using HelloChat.Repositories;
 using HelloChat.Repositories.IRepositories;
 using Microsoft.AspNetCore.SignalR;
@@ -72,6 +73,38 @@ namespace HelloChat.Hubs
         {
             _currentUserConversation.TryGetValue(UserId, out var conversation);
             return conversation;
+        }
+        public async Task SendMessageReaction(string MessageId, string Reaction, string FromId, string ToId)
+        {
+            var enumReaction = MessageReaction.None;
+            switch (Reaction)
+            {
+                case "Love":
+                    enumReaction = MessageReaction.Love;
+                    break;
+                case "Like":
+                    enumReaction = MessageReaction.Like;
+                    break;
+                case "Laugh":
+                    enumReaction = MessageReaction.Laugh;
+                    break;
+                case "Smile":
+                    enumReaction = MessageReaction.Smile;
+                    break;
+                case "Angry":
+                    enumReaction = MessageReaction.Angry;
+                    break;
+                default: return;
+            }
+            await _repository.SetMessageReaction(Guid.Parse(MessageId),FromId,ToId,enumReaction);
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            await Clients.User(FromId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString());
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString());
         }
         public async Task SetCurrentUserConversation(string UserId, string ConversationId)
         {

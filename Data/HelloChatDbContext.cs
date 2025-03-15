@@ -19,8 +19,11 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
         builder.Entity<Message>()
-            .Property(m => m.Reaction)
+            .Property(m => m.ReactionFromReceiver)
         .HasConversion<int>();
+        builder.Entity<Message>()
+            .Property(m => m.ReactionFromSender)
+            .HasConversion<int>();
 
         builder.Entity<Message>()
             .HasOne(m => m.Conversation)

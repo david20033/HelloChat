@@ -2,6 +2,6 @@
 {
     public enum MessageReaction
     {
-        None,Like,Dislike,Love
+        None,Like,Dislike,Love,Laugh,Smile,Angry
     }
 }

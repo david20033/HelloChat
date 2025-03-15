@@ -223,7 +223,6 @@ namespace HelloChat.Repositories
                 CreatedDate = DateTime.Now,
                 isSeen = false,
                 SeenTime = null,
-                Reaction = MessageReaction.None,
             };
             await _context.Messages.AddAsync(Message);
             await _context.SaveChangesAsync();
@@ -315,6 +314,20 @@ namespace HelloChat.Repositories
             var message = await _context.Messages.Where(m => m.Id == MessageId).FirstOrDefaultAsync();
             if (message == null) return;
             message.isLocalDeleted = true;
+            await _context.SaveChangesAsync();
+        }
+        public async Task SetMessageReaction(Guid MessageId, string From_Id, string To_Id,MessageReaction reaction)
+        {
+            var Message = await _context.Messages.FirstOrDefaultAsync(m=>m.Id == MessageId);
+            if (Message == null) return;
+            if (Message.From_id == From_Id && Message.To_id == To_Id)
+            {
+                Message.ReactionFromSender = reaction;
+            }
+            else if (Message.To_id == From_Id && Message.From_id == To_Id)
+            {
+                Message.ReactionFromReceiver = reaction;
+            }
             await _context.SaveChangesAsync();
         }
     }

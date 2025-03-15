@@ -1,4 +1,5 @@
 ﻿using HelloChat.Data;
+using HelloChat.Enums;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
 
@@ -23,5 +24,6 @@ namespace HelloChat.Repositories.IRepositories
         Task DeleteMessageContent(Guid MessageId);
 
         Task SetLocalDeleted(Guid MessageId);
+        Task SetMessageReaction(Guid MessageId, string From_Id, string To_Id, MessageReaction reaction);
     }
 }

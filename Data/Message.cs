@@ -27,8 +27,8 @@ namespace HelloChat.Data
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool isSeen { get; set; }
         public DateTime? SeenTime { get; set; }
-        public MessageReaction Reaction { get; set; } = MessageReaction.None;
-
+        public MessageReaction ReactionFromReceiver { get; set; } = MessageReaction.None;
+        public MessageReaction ReactionFromSender { get; set; } = MessageReaction.None;
         public bool isDeleted { get; set; } = false;
         public bool isLocalDeleted { get; set; } = false;
 

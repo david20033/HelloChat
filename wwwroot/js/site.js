@@ -116,6 +116,9 @@ connection.on("ReceiveLocalDeleteMessage", function (MessageId) {
     var parentDiv = message.parentElement;
     parentDiv.style.display = "none";
 });
+connection.on("ReceiveMessageReaction", function (MessageId, Reaction) {
+    alert(Reaction+" "+MessageId);
+});
 
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
@@ -246,6 +249,37 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.reaction-container').forEach(container => {
         container.addEventListener('click', function (e) {
             if (e.target.classList.contains('reaction-button')) {
+                var ToId = document.getElementById("ToId").value;
+                var FromId = document.getElementById("FromId").value;
+                const parent = e.target.parentElement.parentElement;
+                const messageBalon = parent.querySelector(".message-balon");
+                //alert(messageBalon);
+                const messageId = messageBalon.id;
+                if (e.target.classList.contains('love-reaction')) {
+                    connection.invoke("SendMessageReaction", messageId, "Love", FromId, ToId).catch(function (err) {
+                        console.error(err.toString());
+                    });
+                }
+                else if (e.target.classList.contains('like-reaction')) {
+                    connection.invoke("SendMessageReaction", messageId, "Like", FromId, ToId).catch(function (err) {
+                        console.error(err.toString());
+                    });
+                }
+                else if (e.target.classList.contains('laugh-reaction')) {
+                    connection.invoke("SendMessageReaction", messageId, "Laugh", FromId, ToId).catch(function (err) {
+                        console.error(err.toString());
+                    });
+                }
+                else if (e.target.classList.contains('smile-reaction')) {
+                    connection.invoke("SendMessageReaction", messageId, "Smile", FromId, ToId).catch(function (err) {
+                        console.error(err.toString());
+                    });
+                }
+                else if (e.target.classList.contains('angry-reaction')) {
+                    connection.invoke("SendMessageReaction", messageId, "Angry", FromId, ToId).catch(function (err) {
+                        console.error(err.toString());
+                    });
+                }
                 container.style.display = 'none';
             }
         });
