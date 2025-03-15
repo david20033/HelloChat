@@ -219,3 +219,35 @@ document.querySelectorAll(".message-row").forEach(function (element) {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const reactButtons = document.querySelectorAll('.React');
+
+    reactButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            document.querySelectorAll('.reaction-container').forEach(c => c.style.display = 'none');
+
+            const messageRow = button.closest('.message-row');
+            const reactionContainer = messageRow.querySelector('.reaction-container');
+            if (reactionContainer) {
+                reactionContainer.style.display = 'flex';
+            }
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.reaction-container') && !e.target.classList.contains('React')) {
+            document.querySelectorAll('.reaction-container').forEach(c => c.style.display = 'none');
+        }
+    });
+
+    document.querySelectorAll('.reaction-container').forEach(container => {
+        container.addEventListener('click', function (e) {
+            if (e.target.classList.contains('reaction-button')) {
+                container.style.display = 'none';
+            }
+        });
+    });
+});
