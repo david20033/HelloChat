@@ -71,6 +71,10 @@ namespace HelloChat.Controllers
             await _profileService.AcceptFriendRequest(currentUserId, id);
             return RedirectToAction("Index", new { id });
         }
+        public  IActionResult Edit()
+        {
+            return View();
+        }
 
     }
 }

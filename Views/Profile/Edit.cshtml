@@ -1,0 +1,62 @@
+﻿@section Styles {
+    <link href="/css/EditProfile.css" rel="stylesheet" />
+}
+
+<div class="container">
+    <div class="profile-card">
+        <h1>Edit Profile</h1>
+        <form action="#">
+            <div class="profile-section">
+                <div class="profile-image">
+                    <img id="profilePic" src="/images/blank-profile-picture-973460_960_720.webp" alt="Profile Image">
+                </div>
+                <label class="file-label">
+                    📁 Upload New Photo
+                    <input type="file" class="file-input" id="file" onchange="updateFileName()">
+                    <span class="file-name" id="file-name">No file chosen</span>
+                </label>
+            </div>
+
+
+			<div class="profile-info">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" placeholder="Enter first name">
+                </div>
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" placeholder="Enter last name">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="Enter email">
+                </div>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="Enter phone number">
+                </div>
+            </div>
+
+
+            <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateFileName() {
+      const fileInput = document.getElementById('file');
+      const fileName = document.getElementById('file-name');
+      const profilePic = document.getElementById('profilePic');
+
+      if (fileInput.files.length > 0) {
+        fileName.textContent = fileInput.files[0].name;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profilePic.src = e.target.result;
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      }
+    }
+</script>
