@@ -147,6 +147,12 @@ h2 {
     border-radius: 20px;
     position: relative;
     margin: 0;
+    display: inline-block; /* Allows the element to adjust based on content */
+    max-width: 500px;
+    width: auto; /* Adjusts the width based on content (not fixed) */
+    word-wrap: break-word; /* Ensures long words wrap to the next line */
+    overflow-wrap: break-word; /* For better word breaking */
+    white-space: normal;
 }
 
 .messages .message-row .message-from {
@@ -167,7 +173,7 @@ h2 {
 }
 .message-options {
     display:none;
-    order: 2;
+    order: 1;
     width: 25px;
     height: 25px;
     cursor: pointer;
@@ -186,21 +192,25 @@ h2 {
 }
 .message-container {
     position: relative;
+/*    order: 1;*/
 }
 
 .message-reaction {
     position: absolute;
-    top: 8px;
-    right: 0px;
+    top: -20px;
     background-color: #ffffff;
-    width: 28px;
-    height: 28px;
+    width: fit-content;
+    height: 40px;
     padding: 5px;
     border-radius: 20px;
     border: solid black 1px;
     display: flex;
     align-items: center;
+    justify-content:center;
 }
+    .message-reaction p{
+        margin: 0;
+    }
 
     .message-reaction.left {
         left: 87%;

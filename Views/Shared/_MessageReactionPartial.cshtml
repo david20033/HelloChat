@@ -1,0 +1,36 @@
+﻿@using HelloChat.Enums
+@model HelloChat.Data.Message
+@{
+    var position = ViewData["Position"] as string;
+}
+
+@if (Model.ReactionFromReceiver != MessageReaction.None || Model.ReactionFromSender != MessageReaction.None)
+{
+    var reactionEmojis = new Dictionary<MessageReaction, string>
+    {
+    { MessageReaction.Love, "♥️" },
+    { MessageReaction.Like, "👍" },
+    { MessageReaction.Laugh, "😂" },
+    { MessageReaction.Smile, "😊" },
+    { MessageReaction.Angry, "😡" }
+    };
+    <div class="message-reaction @position">
+
+        @if (Model.ReactionFromReceiver != MessageReaction.None)
+        {
+
+            if (reactionEmojis.TryGetValue(Model.ReactionFromReceiver, out var emoji))
+            {
+                <p data-user-id="@Model.To_id">@emoji</p>
+            }
+        }
+
+        @if (Model.ReactionFromSender != MessageReaction.None)
+        {
+            if (reactionEmojis.TryGetValue(Model.ReactionFromSender, out var emoji))
+            {
+                <p data-user-id="@Model.From_id">@emoji</p>
+            }
+        }
+    </div>
+}

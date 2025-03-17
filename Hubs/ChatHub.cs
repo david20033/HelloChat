@@ -99,12 +99,12 @@ namespace HelloChat.Hubs
             await _repository.SetMessageReaction(Guid.Parse(MessageId),FromId,ToId,enumReaction);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
-            await Clients.User(FromId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString());
+            await Clients.User(FromId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString(), FromId);
             if (CurrConversation == null || CurrConversation != ToUserConversation)
             {
                 return;
             }
-            await Clients.User(ToId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString());
+            await Clients.User(ToId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString(), FromId);
         }
         public async Task SetCurrentUserConversation(string UserId, string ConversationId)
         {
