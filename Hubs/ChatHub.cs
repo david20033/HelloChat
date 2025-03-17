@@ -6,6 +6,7 @@ using HelloChat.Enums;
 using HelloChat.Repositories;
 using HelloChat.Repositories.IRepositories;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 namespace HelloChat.Hubs
 {
     public class ChatHub : Hub
@@ -69,6 +70,14 @@ namespace HelloChat.Hubs
             await _repository.SetLocalDeleted(Guid.Parse(MessageId));
             await Clients.User(FromId).SendAsync("ReceiveLocalDeleteMessage", MessageId);
         }
+        public async Task SendCurrentActiveStatus(string UserId)
+        {
+            var CurrConversation = GetCurrentUserConversation(UserId);
+            if(CurrConversation.IsNullOrEmpty()) return;
+            var AnotherUserId = await _repository.GetAnotherUserIdInConversationAsync(UserId,Guid.Parse(CurrConversation));
+            var ActiveString = await _repository.GetUserActiveString(AnotherUserId);
+            await Clients.User(UserId).SendAsync("ReceiveActiveString", ActiveString);
+        }
         private  string? GetCurrentUserConversation(string UserId)
         {
             _currentUserConversation.TryGetValue(UserId, out var conversation);
@@ -127,35 +136,37 @@ namespace HelloChat.Hubs
                 await Clients.User(OtherUserId).SendAsync("ReceiveSeen", messageId);
             }
         }
-        public override Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
-            string userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId))
             {
-                Groups.AddToGroupAsync(Context.ConnectionId, userId);
-                _onlineUsers.Add(userId);
+                await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+                 _onlineUsers.Add(userId);
+                await _repository.SetUserActive(userId);
             }
-            var FriendIds = GetFriendIds(userId).Result;
+            var FriendIds = await GetFriendIds(userId);
             foreach (var fr in FriendIds)
             {
-                Clients.User(fr).SendAsync("FriendConnected", userId);
+               await Clients.User(fr).SendAsync("FriendConnected", userId);
             }
 
-            return base.OnConnectedAsync();
+            await base.OnConnectedAsync();
         }
-        public override  Task OnDisconnectedAsync(Exception? exception)
+        public override  async Task OnDisconnectedAsync(Exception? exception)
         {
             string userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             _onlineUsers.Remove(userId);
+            await _repository.SetUserExitActive(userId);
             var onlineFriendIds =  GetOnlineFriends(userId).Result;
             foreach (var fr in onlineFriendIds)
             {
-                 Clients.User(fr).SendAsync("FriendDisconnected", userId);
+                await Clients.User(fr).SendAsync("FriendDisconnected", userId);
             }
 
-            return base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
         }
         public async Task GetOnlineUsers(List<string> friendIds)
         {

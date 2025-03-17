@@ -5,6 +5,7 @@ using HelloChat.Enums;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,14 +14,14 @@ namespace HelloChat.Repositories
     public class AppRepository : IAppRepository
     {
         private readonly HelloChatDbContext _context;
-        public AppRepository(HelloChatDbContext context) 
+        public AppRepository(HelloChatDbContext context)
         {
             _context = context;
         }
         public async Task<HomeViewModel> GetHomeViewModelAsync(string CurrentUserId, string User2Id)
         {
             var CurrentUser = await _context.Users
-                .Include(u=>u.FriendshipsInitiated)
+                .Include(u => u.FriendshipsInitiated)
                 .Include(u => u.FriendshipsReceived)
                 .FirstAsync(u => u.Id == CurrentUserId);
             var User2 = await _context.Users.FirstOrDefaultAsync(u => u.Id == User2Id);
@@ -38,8 +39,8 @@ namespace HelloChat.Repositories
                     user = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
                 }
                 var Message = _context.Messages
-                    .Where(m=>m.To_id==CurrentUserId&&m.From_id==user.Id)
-                    .OrderByDescending(m=>m.CreatedDate)
+                    .Where(m => m.To_id == CurrentUserId && m.From_id == user.Id)
+                    .OrderByDescending(m => m.CreatedDate)
                     .FirstOrDefault();
                 var FriendModel = new FriendsViewModel
                 {
@@ -50,7 +51,7 @@ namespace HelloChat.Repositories
                     UserId = user.Id,
                     ConversationId = Message?.ConversationId
                 };
-                if (await GetConversationAsync(CurrentUserId,user.Id)==null)
+                if (await GetConversationAsync(CurrentUserId, user.Id) == null)
                 {
                     var el = new Conversation
                     {
@@ -58,10 +59,10 @@ namespace HelloChat.Repositories
                         User1Id = CurrentUserId,
                         User2Id = user.Id,
                     };
-                    FriendModel.ConversationId= el.Id;
+                    FriendModel.ConversationId = el.Id;
                     await _context.Conversation.AddAsync(el);
                     await _context.SaveChangesAsync();
-                } 
+                }
                 else if (FriendModel.ConversationId == null)
                 {
                     var el = await GetConversationAsync(CurrentUserId, user.Id);
@@ -70,7 +71,7 @@ namespace HelloChat.Repositories
                 FriendsList.Add(FriendModel);
             }
             var Conversation = await GetConversationAsync(CurrentUserId, User2Id);
-            if (Conversation == null&&!User2Id.IsNullOrEmpty())
+            if (Conversation == null && !User2Id.IsNullOrEmpty())
             {
                 Conversation = new Conversation
                 {
@@ -90,33 +91,35 @@ namespace HelloChat.Repositories
                     .OrderByDescending(m => m.SeenTime)
                     .FirstOrDefault();
             }
+            string active = await GetUserActiveString(User2Id);
             return new HomeViewModel
             {
                 CurrentConversationId = Conversation?.Id ?? Guid.Empty,
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 Friends = FriendsList,
-                Messages = Conversation?.Messages.OrderBy(m=>m.CreatedDate).ToList() ?? new List<Message>(),
+                Messages = Conversation?.Messages.OrderBy(m => m.CreatedDate).ToList() ?? new List<Message>(),
+                ActiveString = active,
                 Name = $"{User2?.FirstName} {User2?.LastName}",
                 SenderId = User2Id,
                 ReceiverId = CurrentUserId,
-                LastSeenMessageId=lastSeenMessage?.Id,
+                LastSeenMessageId = lastSeenMessage?.Id,
             };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {
             return await _context
                 .Users
-                .Where(u=>u.UserName.Contains(query))
+                .Where(u => u.UserName.Contains(query))
                 .ToListAsync();
         }
-        public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId )
+        public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == ProfileUserId);
             var FriendShipStatus = FriendshipStatus.NoFriends;
 
-            if(!_context.FriendRequest.Where(fr=>fr.RequesterId==CurrentUserId&& fr.ReceiverId == ProfileUserId).IsNullOrEmpty())
+            if (!_context.FriendRequest.Where(fr => fr.RequesterId == CurrentUserId && fr.ReceiverId == ProfileUserId).IsNullOrEmpty())
             {
-                if(_context.FriendRequest.Where(fr => fr.RequesterId == CurrentUserId && fr.ReceiverId == ProfileUserId).First().isAccepted)
+                if (_context.FriendRequest.Where(fr => fr.RequesterId == CurrentUserId && fr.ReceiverId == ProfileUserId).First().isAccepted)
                 {
                     FriendShipStatus = FriendshipStatus.Friends;
                 }
@@ -127,7 +130,7 @@ namespace HelloChat.Repositories
             }
             else if (!_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).IsNullOrEmpty())
             {
-                if(_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).First().isAccepted)
+                if (_context.FriendRequest.Where(fr => fr.RequesterId == ProfileUserId && fr.ReceiverId == CurrentUserId).First().isAccepted)
                 {
                     FriendShipStatus = FriendshipStatus.Friends;
                 }
@@ -150,7 +153,7 @@ namespace HelloChat.Repositories
         {
             if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
 
-             await _context.FriendRequest.AddAsync(new FriendRequest
+            await _context.FriendRequest.AddAsync(new FriendRequest
             {
                 Id = Guid.NewGuid(),
                 RequesterId = FromId,
@@ -164,13 +167,13 @@ namespace HelloChat.Repositories
         {
             if (FromId == ToId || FromId.IsNullOrEmpty() || ToId.IsNullOrEmpty()) return;
             var FriendShip = await _context.Friendship
-                .FirstOrDefaultAsync(fr => (fr.User1Id == FromId && fr.User2Id == ToId) 
+                .FirstOrDefaultAsync(fr => (fr.User1Id == FromId && fr.User2Id == ToId)
                 || (fr.User2Id == FromId && fr.User1Id == ToId));
             var FriendRequest = await _context.FriendRequest
                 .FirstOrDefaultAsync(fr => (fr.ReceiverId == FromId && fr.RequesterId == ToId)
                 || (fr.RequesterId == FromId && fr.ReceiverId == ToId));
 
-            if (FriendShip != null&&FriendRequest!=null)
+            if (FriendShip != null && FriendRequest != null)
             {
                 _context.Friendship.Remove(FriendShip);
                 _context.FriendRequest.Remove(FriendRequest);
@@ -198,7 +201,7 @@ namespace HelloChat.Repositories
             {
                 return;
             }
-            Request.isAccepted=true;
+            Request.isAccepted = true;
             var Frienship = new Friendship
             {
                 Id = Guid.NewGuid(),
@@ -209,7 +212,7 @@ namespace HelloChat.Repositories
             await _context.Friendship.AddAsync(Frienship);
             await _context.SaveChangesAsync();
         }
-        public async Task<Guid> SendMessageAndReturnItsId (string FromId, string ToId,string Content)
+        public async Task<Guid> SendMessageAndReturnItsId(string FromId, string ToId, string Content)
         {
             var Conversation = await GetConversationAsync(FromId, ToId);
             var Message = new Message
@@ -254,7 +257,7 @@ namespace HelloChat.Repositories
         private async Task<Conversation?> GetConversationAsync(string User1Id, string User2Id)
         {
             return await _context.Conversation
-                .Include(c=>c.Messages)
+                .Include(c => c.Messages)
                 .FirstOrDefaultAsync(c => (c.User1Id == User1Id && c.User2Id == User2Id)
                 || (c.User2Id == User1Id && c.User1Id == User2Id));
         }
@@ -262,13 +265,13 @@ namespace HelloChat.Repositories
         {
             var Conversation = await _context
                 .Conversation
-                .Include(c=>c.Messages)
+                .Include(c => c.Messages)
                 .FirstAsync(c => c.Id == ConversationId);
             var lastMessage = Conversation
                 .Messages
                 .OrderByDescending(m => m.CreatedDate)
                 .FirstOrDefault();
-            if (lastMessage?.From_id == UserId||lastMessage==null) return Guid.Empty;
+            if (lastMessage?.From_id == UserId || lastMessage == null) return Guid.Empty;
             lastMessage.isSeen = true;
             lastMessage.SeenTime = DateTime.Now;
             await _context.SaveChangesAsync();
@@ -284,7 +287,7 @@ namespace HelloChat.Repositories
                 .Messages
                 .OrderByDescending(m => m.CreatedDate)
                 .FirstOrDefault();
-            if ( lastMessage == null) return false;
+            if (lastMessage == null) return false;
             return lastMessage.isSeen;
         }
         public async Task<string> GetAnotherUserIdInConversationAsync(string UserId, Guid ConversationId)
@@ -303,8 +306,8 @@ namespace HelloChat.Repositories
         }
         public async Task DeleteMessageContent(Guid MessageId)
         {
-            var message=await _context.Messages.Where(m=>m.Id==MessageId).FirstOrDefaultAsync();
-            if(message == null) return;
+            var message = await _context.Messages.Where(m => m.Id == MessageId).FirstOrDefaultAsync();
+            if (message == null) return;
             message.Content = "Message Removed";
             message.isDeleted = true;
             await _context.SaveChangesAsync();
@@ -316,9 +319,9 @@ namespace HelloChat.Repositories
             message.isLocalDeleted = true;
             await _context.SaveChangesAsync();
         }
-        public async Task SetMessageReaction(Guid MessageId, string From_Id, string To_Id,MessageReaction reaction)
+        public async Task SetMessageReaction(Guid MessageId, string From_Id, string To_Id, MessageReaction reaction)
         {
-            var Message = await _context.Messages.FirstOrDefaultAsync(m=>m.Id == MessageId);
+            var Message = await _context.Messages.FirstOrDefaultAsync(m => m.Id == MessageId);
             if (Message == null) return;
             if (Message.From_id == From_Id && Message.To_id == To_Id)
             {
@@ -329,6 +332,52 @@ namespace HelloChat.Repositories
                 Message.ReactionFromReceiver = reaction;
             }
             await _context.SaveChangesAsync();
+        }
+        public async Task SetUserActive(string UserId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == UserId);
+            if (user == null) return;
+            user.isActive = true;
+            await _context.SaveChangesAsync();
+        }
+        public async Task SetUserExitActive(string UserId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == UserId);
+            if (user == null) return;
+            user.isActive = false;
+            user.LastTimeActive = DateTime.Now;
+            await _context.SaveChangesAsync();
+        }
+        public async Task<string> GetUserActiveString(string UserId){
+            string active = "";
+            var User = await _context.Users.FirstOrDefaultAsync(u => u.Id == UserId);
+            if (User != null && User.isActive)
+            {
+                active = "Active Now";
+            }
+            else if (User != null)
+            {
+                DateTime now = DateTime.Now;
+                DateTime lastActive = User.LastTimeActive;
+                TimeSpan difference = now - lastActive;
+                if (difference < TimeSpan.FromMinutes(5))
+                {
+                    active = "Last Active: Just Now";
+                }
+                else if (difference >= TimeSpan.FromMinutes(5) && difference <= TimeSpan.FromMinutes(59))
+                {
+                    active = $"Last Active: {difference.Minutes.ToString()} Minute/s ago";
+                }
+                else if (difference >= TimeSpan.FromHours(1) && difference <= TimeSpan.FromHours(23))
+                {
+                    active = $"Last Active: {difference.Hours.ToString()} Hour/s ago";
+                }
+                else if (difference >= TimeSpan.FromDays(1))
+                {
+                    active = $"Last Active: {difference.Days.ToString()} Day/s ago";
+                }
+            }
+            return active;
         }
     }
 }

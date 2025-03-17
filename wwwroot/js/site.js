@@ -193,6 +193,11 @@ connection.on("ReceiveMessageReaction", function (MessageId, Reaction, UserId) {
     messageBallon.appendChild(div);
 });
 
+connection.on("ReceiveActiveString", function (ActiveString) {
+    var ActiveEl = document.getElementById("last-active");
+    ActiveEl.innerText = ActiveString;
+});
+
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
     connection.invoke("GetOnlineUsers", friendIds).catch(function (err) {
@@ -275,6 +280,14 @@ document.querySelectorAll(".message-row").forEach(function (element) {
         });
     }
 });
+
+function UpdateActiveStatus() {
+    const User = document.getElementById("FromId").value;
+    connection.invoke("SendCurrentActiveStatus",User).catch(function (err) {
+        console.error(err.toString());
+    });
+}
+setInterval(UpdateActiveStatus, 1 * 60 * 1000);
 
 //another js
 window.addEventListener("load", function () {
@@ -405,3 +418,4 @@ function createReactionContainer() {
 
     return container;
 }
+

@@ -25,5 +25,9 @@ namespace HelloChat.Repositories.IRepositories
 
         Task SetLocalDeleted(Guid MessageId);
         Task SetMessageReaction(Guid MessageId, string From_Id, string To_Id, MessageReaction reaction);
+
+        Task SetUserActive(string UserId);
+        Task SetUserExitActive(string UserId);
+        Task<string> GetUserActiveString(string UserId);
     }
 }

@@ -8,6 +8,8 @@ namespace HelloChat.Data
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? ProfilePicturePath {  get; set; }
+        public bool isActive { get; set; } = true;
+        public DateTime LastTimeActive { get; set; } = DateTime.Now;
         public ICollection<FriendRequest> SentRequests { get; set; }
         public ICollection<FriendRequest> ReceivedRequests { get; set; }
         public ICollection<Friendship> FriendshipsInitiated { get; set; }
