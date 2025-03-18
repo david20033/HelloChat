@@ -155,11 +155,11 @@ h2 {
     border-radius: 20px;
     position: relative;
     margin: 0;
-    display: inline-block; /* Allows the element to adjust based on content */
+    display: inline-block; 
     max-width: 500px;
-    width: auto; /* Adjusts the width based on content (not fixed) */
-    word-wrap: break-word; /* Ensures long words wrap to the next line */
-    overflow-wrap: break-word; /* For better word breaking */
+    width: auto; 
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
     white-space: normal;
 }
 
