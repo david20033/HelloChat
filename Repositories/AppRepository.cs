@@ -49,7 +49,8 @@ namespace HelloChat.Repositories
                     ProfileImageUrl = user.ProfilePicturePath ?? "",
                     sentTime = Message?.CreatedDate,
                     UserId = user.Id,
-                    ConversationId = Message?.ConversationId
+                    ConversationId = Message?.ConversationId,
+                    isLastMessageSeen=Message?.isSeen
                 };
                 if (await GetConversationAsync(CurrentUserId, user.Id) == null)
                 {

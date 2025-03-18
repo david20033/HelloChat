@@ -197,6 +197,10 @@ connection.on("ReceiveActiveString", function (ActiveString) {
     var ActiveEl = document.getElementById("last-active");
     ActiveEl.innerText = ActiveString;
 });
+connection.on("ReceiveMessageNotification", function (CurrConversation) {
+    const Conversation = document.querySelector(`[data-conversation-id='${CurrConversation}']`);
+    Conversation.querySelector(".new-message").style.display = "block";
+});
 
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;

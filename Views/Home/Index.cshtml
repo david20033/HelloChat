@@ -50,6 +50,15 @@
                             <p class="last-message">@item.lastMessage . @item.sentTime</p>
                         }
                     </div>
+                    @if (item.isLastMessageSeen == true || item.isLastMessageSeen == null)
+                    {
+                        <div class="new-message" style="display:none">
+                        </div>
+                    }
+                    else{
+                        <div class="new-message" style="display:block">
+                        </div>
+                    }
                 </div>
             }
         </div>
