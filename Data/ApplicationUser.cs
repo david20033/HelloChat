@@ -7,7 +7,7 @@ namespace HelloChat.Data
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public string? ProfilePicturePath {  get; set; }
+        public string? ProfilePicturePath { get; set; } = "/images/blank-profile-picture.webp";
         public bool isActive { get; set; } = true;
         public DateTime LastTimeActive { get; set; } = DateTime.Now;
         public ICollection<FriendRequest> SentRequests { get; set; }

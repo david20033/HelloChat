@@ -1,18 +1,21 @@
-﻿@section Styles {
+﻿@model HelloChat.ViewModels.EditProfileViewModel
+@section Styles {
     <link href="/css/EditProfile.css" rel="stylesheet" />
 }
 
 <div class="container">
     <div class="profile-card">
         <h1>Edit Profile</h1>
-        <form action="#">
+        <form asp-controller="Profile" asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="ProfileImagePath" value="@Model.ProfileImagePath" />
             <div class="profile-section">
                 <div class="profile-image">
-                    <img id="profilePic" src="/images/blank-profile-picture-973460_960_720.webp" alt="Profile Image">
+                    <img id="profilePic" src="@Model.ProfileImagePath" alt="Profile Image">
                 </div>
                 <label class="file-label">
                     📁 Upload New Photo
-                    <input type="file" class="file-input" id="file" onchange="updateFileName()">
+                    <input type="file" class="file-input" id="file" name="profileImage" accept="image/*" onchange="updateFileName()">
                     <span class="file-name" id="file-name">No file chosen</span>
                 </label>
             </div>
@@ -21,19 +24,23 @@
 			<div class="profile-info">
                 <div class="input-group">
                     <label>First Name</label>
-                    <input type="text" placeholder="Enter first name">
+                    <input asp-for="FirstName" type="text" name="FirstName" placeholder="Enter first name" value="@Model.FirstName">
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
                 </div>
                 <div class="input-group">
                     <label>Last Name</label>
-                    <input type="text" placeholder="Enter last name">
+                    <input asp-for="LastName" type="text" name="LastName" placeholder="Enter last name" value="@Model.LastName">
+                    <span asp-validation-for="LastName" class="text-danger"></span>
                 </div>
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" placeholder="Enter email">
+                    <input asp-for="Email" type="email" name="Email" placeholder="Enter email" value="@Model.Email">
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="input-group">
                     <label>Phone Number</label>
-                    <input type="tel" placeholder="Enter phone number">
+                    <input asp-for="PhoneNumber" type="tel" name="PhoneNumber" placeholder="Enter phone number" value="@Model.PhoneNumber">
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                 </div>
             </div>
 
@@ -42,7 +49,11 @@
         </form>
     </div>
 </div>
-
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
 <script>
     function updateFileName() {
       const fileInput = document.getElementById('file');

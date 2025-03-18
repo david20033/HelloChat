@@ -2,6 +2,6 @@
 {
     public enum FriendshipStatus
     {
-        Friends, NoFriends, FriendRequestSend, FriendRequestReceived
+        Friends, NoFriends, FriendRequestSend, FriendRequestReceived, SameUser
     }
 }

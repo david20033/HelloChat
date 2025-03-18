@@ -4,24 +4,34 @@
     ViewData["Title"] = "Profile";
     string InnerText="";
     string Action = "";
+    string Method = "";
     if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.NoFriends){
         InnerText = "Add Friends";
         Action = "SendFriendRequest";
+        Method = "post";
     }
     else if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.Friends)
     {
         InnerText = "Unfriend";
         Action = "DeleteFriend";
+        Method = "post";
     }
     else if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.FriendRequestSend)
     {
         InnerText = "Cancel Friend Request";
         Action = "DeleteFriendRequest";
+        Method = "post";
+    }
+    else if (Model.FriendshipStatus == HelloChat.Enums.FriendshipStatus.SameUser){
+        InnerText = "Edit Profile";
+        Action = "Edit";
+        Method = "get";
     }
     else
     {
         InnerText = "Accept Friend Request";
         Action = "AcceptFriendRequest";
+        Method = "post";
     }
 }
 
@@ -45,7 +55,7 @@
             <h2>@Model.FullName</h2>
             <p><strong>Email:</strong> @Model.Email</p>
             <div class="d-flex justify-content-center mt-4">
-                <form id="friendRequestForm" asp-controller="Profile" asp-action="@Action" method="post">
+                <form id="friendRequestForm" asp-controller="Profile" asp-action="@Action" method="@Method">
                     <input type="hidden" name="id" value="@Model.Id" />
                     <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">@InnerText</button>
                 </form>

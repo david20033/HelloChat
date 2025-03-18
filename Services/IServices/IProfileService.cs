@@ -9,5 +9,7 @@ namespace HelloChat.Services.IServices
         Task DeleteFriend(string FromId, string ToId);
         Task DeleteFriendRequest(string FromId, string ToId);
         Task AcceptFriendRequest(string FromId, string ToId);
+        Task<EditProfileViewModel> GetEditProfileViewModel(string UserId);
+        Task<(string, string)> TryToEditProfile(EditProfileViewModel model);
     }
 }

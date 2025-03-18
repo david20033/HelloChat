@@ -29,5 +29,8 @@ namespace HelloChat.Repositories.IRepositories
         Task SetUserActive(string UserId);
         Task SetUserExitActive(string UserId);
         Task<string> GetUserActiveString(string UserId);
+        Task<EditProfileViewModel> GetEditProfileViewModel(string UserId);
+        Task UpdateUserPicturePath(string UserId, string PicturePath);
+        Task EditProfile(EditProfileViewModel model);
     }
 }

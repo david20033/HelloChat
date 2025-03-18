@@ -46,7 +46,7 @@ namespace HelloChat.Repositories
                 {
                     lastMessage = Message?.Content,
                     Name = $"{user.FirstName} {user.LastName}",
-                    ProfileImageUrl = "/images/blank-profile-picture.webp",
+                    ProfileImageUrl = user.ProfilePicturePath ?? "",
                     sentTime = Message?.CreatedDate,
                     UserId = user.Id,
                     ConversationId = Message?.ConversationId
@@ -95,7 +95,7 @@ namespace HelloChat.Repositories
             return new HomeViewModel
             {
                 CurrentConversationId = Conversation?.Id ?? Guid.Empty,
-                ProfilePicturePath = "/images/blank-profile-picture.webp",
+                ProfilePicturePath = User2?.ProfilePicturePath??"",
                 Friends = FriendsList,
                 Messages = Conversation?.Messages.OrderBy(m => m.CreatedDate).ToList() ?? new List<Message>(),
                 ActiveString = active,
@@ -138,6 +138,10 @@ namespace HelloChat.Repositories
                 {
                     FriendShipStatus = FriendshipStatus.FriendRequestReceived;
                 }
+            }
+            if (ProfileUserId == CurrentUserId)
+            {
+                FriendShipStatus = FriendshipStatus.SameUser;
             }
             return new ProfileViewModel
             {
@@ -378,6 +382,37 @@ namespace HelloChat.Repositories
                 }
             }
             return active;
+        }
+        public async Task<EditProfileViewModel> GetEditProfileViewModel(string UserId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==UserId);
+            if (user == null) return null;
+            return new EditProfileViewModel
+            {
+                Id = UserId,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                ProfileImagePath = user.ProfilePicturePath
+            };
+        }
+        public async Task EditProfile(EditProfileViewModel model)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.Id);
+            if (user == null) return;
+            user.FirstName = model.FirstName;
+            user.LastName=model.LastName;
+            user.PhoneNumber = model.PhoneNumber.ToString();
+            user.Email = model.Email;
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateUserPicturePath(string UserId,string PicturePath)
+        {
+            var user=await _context.Users.FirstOrDefaultAsync(u=>u.Id==UserId);   
+            if (user == null) return;
+            user.ProfilePicturePath = PicturePath;
+            await _context.SaveChangesAsync();
         }
     }
 }
