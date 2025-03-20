@@ -1,4 +1,7 @@
-﻿<div class="reaction-container">
+﻿@{
+    var position = ViewData["Position"] as string;
+}
+<div class="reaction-container position">
     <p class="reaction-button love-reaction">♥️</p>
     <p class="reaction-button like-reaction">👍</p>
     <p class="reaction-button laugh-reaction">😂</p>
