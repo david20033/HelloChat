@@ -62,17 +62,18 @@ connection.on("ReceiveTyping", function () {
     }
     const chatContainer = document.getElementsByClassName("messages")[0];
 
-    var p = document.createElement("p");
-    p.classList.add("message-balon");
-    p.classList.add("message-to");
-    p.classList.add("typing");
-    p.id = "TypingBalon";
+    var div = document.createElement("div");
+    div.classList.add("message");
+    div.classList.add("received");
+    div.classList.add("typing");
+    div.classList.add("left");
+    div.id = "TypingBalon";
     for (var i = 0; i < 3; i++) {
         var span = document.createElement("span");
         span.classList.add("dot");
-        p.appendChild(span);
+        div.appendChild(span);
     }
-    chatContainer.appendChild(p);
+    chatContainer.appendChild(div);
     messageEl.scrollTop = messagesDiv.scrollHeight;
 });
 connection.on("ReceiveStopTyping", function () {
