@@ -125,6 +125,7 @@ namespace HelloChat.Repositories
                 .Where(m => m.isSeen == true && m.To_id == ReceiverId)
                 .OrderByDescending(m => m.SeenTime)
                 .FirstOrDefault();
+            string active = await GetUserActiveString(ReceiverId);
             return new HomeViewModel
             {
                 CurrentConversationId = ConversationId,
@@ -133,7 +134,8 @@ namespace HelloChat.Repositories
                 ReceiverId = ReceiverId,
                 Name = $"{Receiver.FirstName} {Receiver.LastName}",
                 ProfilePicturePath = Receiver.ProfilePicturePath,
-                LastSeenMessageId= lastSeenMessage?.Id
+                LastSeenMessageId= lastSeenMessage?.Id,
+                ActiveString= active
             };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
