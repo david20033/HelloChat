@@ -1,6 +1,5 @@
 ﻿"use strict";
 
-// === SignalR Setup === //
 const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 const currentUserId = document.getElementById("FromId")?.value;
 const friendIds = Array.from(document.querySelectorAll(".friend-id")).map(input => input.value);
@@ -8,7 +7,6 @@ var messagesContainer;
 let typingTimer;
 const doneTypingInterval = 1000;
 
-// === SignalR Events === //
 connection.on("ReceiveMessage", handleReceiveMessage);
 connection.on("SendMessage", handleSendMessage);
 connection.on("ReceiveTyping", showTypingIndicator);
@@ -23,12 +21,10 @@ connection.on("ReceiveMessageReaction", handleMessageReaction);
 connection.on("ReceiveActiveString", updateLastActive);
 connection.on("ReceiveMessageNotification", showNewMessageNotification);
 
-// === Start SignalR Connection === //
 connection.start()
     .then(() => connection.invoke("GetOnlineUsers", friendIds).catch(console.error))
     .catch(console.error);
 
-// === DOM Ready Setup === //
 document.addEventListener("DOMContentLoaded", () => {
     setupConversationSwitching();
     setupMessageHoverEvents();
@@ -37,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
 });
 
-// === Setup Events after partial load === //
 function setupCommonEvents() {
     messagesContainer = document.getElementById("messages");
     const sendButton = document.getElementById("sendButton");
@@ -53,7 +48,6 @@ function setupCommonEvents() {
     }
 }
 
-// === Conversation Switch with Partial Reload === //
 function setupConversationSwitching() {
     document.querySelectorAll(".ConversationChanger").forEach(el => {
         el.addEventListener("click", () => {
@@ -75,7 +69,7 @@ function renderPartialConversation(conversationId) {
                 el.style.display = "none";
             }
             container.innerHTML = html;
-            setupCommonEvents(); // rebind events for partial content
+            setupCommonEvents();
             setupMessageHoverEvents();
             setupReactionUIEvents();
             scrollToBottom();
@@ -83,7 +77,6 @@ function renderPartialConversation(conversationId) {
         .catch(console.error);
 }
 
-// === Utility Functions === //
 function scrollToBottom() {
     messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
 }
@@ -97,7 +90,6 @@ function updateActiveStatus() {
 
 setInterval(updateActiveStatus, 60000);
 
-// === Typing Indicator === //
 function showTypingIndicator() {
     if (document.getElementById("TypingBalon")) return;
     const div = document.createElement("div");
@@ -125,7 +117,6 @@ function removeTypingIndicator() {
     if (el) el.remove();
 }
 
-// === Message Handling === //
 function sendMessage(event) {
     event.preventDefault();
     const content = document.getElementById("Content")?.value;
@@ -166,7 +157,6 @@ function createMessageRow(type, messageId, text, deleteClass, order) {
     return row;
 }
 
-// === Message Reactions === //
 function createReactionContainer() {
     const container = document.createElement("div");
     container.className = "reaction-container";
@@ -220,7 +210,6 @@ function handleMessageReaction(messageId, reaction, userId) {
     if (emojiMap[reaction]) p.innerText = emojiMap[reaction];
 }
 
-// === Message Delete === //
 function handleOwnMessageDelete(event) {
     const deleteBtn = event.target.closest(".deleteOwnMessage");
     if (!deleteBtn) return;
@@ -261,7 +250,6 @@ function handleLocalDeleteMessage(messageId) {
     if (msg) msg.parentElement.style.display = "none";
 }
 
-// === Additional Features === //
 function markMessageAsSeen(messageId) {
     document.querySelectorAll(".read-status-message").forEach(el => el.remove());
     const message = document.getElementById(messageId);
@@ -295,7 +283,6 @@ function showNewMessageNotification(conversationId) {
     if (el) el.style.display = "block";
 }
 
-// === Typing Events === //
 function handleTyping() {
     clearTimeout(typingTimer);
     const toId = document.getElementById("ToId").value;
@@ -307,7 +294,6 @@ function handleTyping() {
     }, doneTypingInterval);
 }
 
-// === UI Hover Events === //
 function setupMessageHoverEvents() {
     messagesContainer?.addEventListener("mouseover", e => {
         const row = e.target.closest(".message-row");
@@ -320,7 +306,6 @@ function setupMessageHoverEvents() {
     });
 }
 
-// === Reaction UI Events === //
 function setupReactionUIEvents() {
     const messages = document.getElementById("messages");
 
