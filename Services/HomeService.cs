@@ -14,9 +14,9 @@ namespace HelloChat.Services
         {
             _repository = repository;
         }
-        public async Task<HomeViewModel> GetConversationsViewModel(string CurrentUserId, string User2Id)
+        public async Task<List<FriendsViewModel>> GetFriendsViewModel(string CurrentUserId)
         {
-            return  await _repository.GetHomeViewModelAsync(CurrentUserId,User2Id);
+            return  await _repository.GetFriendsViewModelAsync(CurrentUserId);
         }
         public async Task<List<ApplicationUser>> GetIdentityUsersBySearchQuery(string query)
         {
@@ -25,6 +25,10 @@ namespace HelloChat.Services
         public async Task SendMessage(string FromId, string ToId, string Content)
         {
             await _repository.SendMessageAndReturnItsId(FromId,ToId,Content);
+        }
+        public async Task<HomeViewModel> GetConversationViewModel(Guid ConversationId, string SenderId)
+        {
+            return await _repository.GetConversationViewModel(ConversationId, SenderId);
         }
     }
 }

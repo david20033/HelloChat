@@ -12,7 +12,7 @@ namespace HelloChat.ViewModels
         public string ReceiverId { get; set; }
         public Guid? LastSeenMessageId {  get; set; }
         public ICollection<Message> Messages { get; set; }
-        public ICollection<FriendsViewModel> Friends { get; set; }
+        //public ICollection<FriendsViewModel> Friends { get; set; }
 
     }
 }

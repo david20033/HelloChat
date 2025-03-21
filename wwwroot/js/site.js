@@ -1,400 +1,355 @@
 ﻿"use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
-let currentUserId = document.getElementById("FromId").value;
-var friendIds = Array.from(document.querySelectorAll(".friend-id")).map(input => input.value);
-const messagesContainer = document.getElementById("messages");
+// === SignalR Setup === //
+const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+const currentUserId = document.getElementById("FromId")?.value;
+const friendIds = Array.from(document.querySelectorAll(".friend-id")).map(input => input.value);
+var messagesContainer;
 let typingTimer;
 const doneTypingInterval = 1000;
-//Disable the send button until connection is established.
-document.getElementById("sendButton").disabled = true;
 
-connection.on("ReceiveMessage", function (messageId, message) {
-    var messageEl = document.getElementById("TypingBalon");
-    if (messageEl) {
-        messageEl.remove();
-    }
+// === SignalR Events === //
+connection.on("ReceiveMessage", handleReceiveMessage);
+connection.on("SendMessage", handleSendMessage);
+connection.on("ReceiveTyping", showTypingIndicator);
+connection.on("ReceiveStopTyping", hideTypingIndicator);
+connection.on("OnlineUsers", showOnlineFriends);
+connection.on("FriendDisconnected", id => toggleFriendOnlineStatus(id, false));
+connection.on("FriendConnected", id => toggleFriendOnlineStatus(id, true));
+connection.on("ReceiveSeen", markMessageAsSeen);
+connection.on("ReceiveGlobalDeleteMessage", handleGlobalDeleteMessage);
+connection.on("ReceiveLocalDeleteMessage", handleLocalDeleteMessage);
+connection.on("ReceiveMessageReaction", handleMessageReaction);
+connection.on("ReceiveActiveString", updateLastActive);
+connection.on("ReceiveMessageNotification", showNewMessageNotification);
 
-    var div = document.createElement("div");
-    div.classList.add("message-row")
-    div.classList.add("to")
-    div.classList.add("left")
-    var messageDiv = document.createElement("div");
-    messageDiv.classList.add("message");
-    messageDiv.classList.add("received");
+// === Start SignalR Connection === //
+connection.start()
+    .then(() => connection.invoke("GetOnlineUsers", friendIds).catch(console.error))
+    .catch(console.error);
 
-    messageDiv.textContent = message;
-    messageDiv.id = messageId;
-    const reactionContainer = createReactionContainer();
-    const { divDelete, divReact } = createMessageOptionsIcons("deleteSenderMessage", "3");
-    messageDiv.appendChild(reactionContainer);
-    div.appendChild(messageDiv);
-    div.appendChild(divDelete);
-    div.appendChild(divReact);
-    document.getElementById("messages").appendChild(div);
-    var container = document.getElementById("messages");
-    container.scrollTop = container.scrollHeight;
+// === DOM Ready Setup === //
+document.addEventListener("DOMContentLoaded", () => {
+    setupConversationSwitching();
+    setupMessageHoverEvents();
+    setupReactionUIEvents();
+    setupCommonEvents();
+    messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
 });
-connection.on("SendMessage", function (messageId, message) {
-    var div = document.createElement("div");
-    div.classList.add("message-row")
-    div.classList.add("from")
-    div.classList.add("right")
-    var messageDiv = document.createElement("div");
-    messageDiv.classList.add("message");
-    messageDiv.classList.add("sent");
 
-    messageDiv.textContent = message;
-    messageDiv.id = messageId;
-    const reactionContainer = createReactionContainer();
-    const { divDelete, divReact } = createMessageOptionsIcons("deleteOwnMessage", "1");
-    messageDiv.appendChild(reactionContainer);
-    div.appendChild(messageDiv);
-    div.appendChild(divDelete);
-    div.appendChild(divReact);
-    document.getElementById("messages").appendChild(div);
-    var container = document.getElementById("messages");
-    container.scrollTop = container.scrollHeight;
-});
-connection.on("ReceiveTyping", function () {
-    if (document.getElementById("TypingBalon") != null) {
-        return;
+// === Setup Events after partial load === //
+function setupCommonEvents() {
+    messagesContainer = document.getElementById("messages");
+    const sendButton = document.getElementById("sendButton");
+    const contentInput = document.getElementById("Content");
+
+    if (sendButton) sendButton.addEventListener("click", sendMessage);
+    if (contentInput) contentInput.addEventListener("input", handleTyping);
+
+    document.querySelectorAll(".message-row").forEach(setupSenderMessageDelete);
+
+    if (messagesContainer) {
+        messagesContainer.addEventListener("click", handleOwnMessageDelete);
     }
-    const chatContainer = document.getElementsByClassName("messages")[0];
+}
 
-    var div = document.createElement("div");
-    div.classList.add("message");
-    div.classList.add("received");
-    div.classList.add("typing");
-    div.classList.add("left");
+// === Conversation Switch with Partial Reload === //
+function setupConversationSwitching() {
+    document.querySelectorAll(".ConversationChanger").forEach(el => {
+        el.addEventListener("click", () => {
+            const conversationId = el.getAttribute("data-conversation-id");
+            connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
+                .then(() => renderPartialConversation(conversationId))
+                .catch(console.error);
+        });
+    });
+}
+
+function renderPartialConversation(conversationId) {
+    fetch(`/Home/LoadConversation?conversationId=${conversationId}`)
+        .then(res => res.text())
+        .then(html => {
+            const container = document.getElementById("chat-container");
+            const el = document.querySelector(`[data-conversation-id='${conversationId}'] .new-message`);
+            if (el) {
+                el.style.display = "none";
+            }
+            container.innerHTML = html;
+            setupCommonEvents(); // rebind events for partial content
+            setupMessageHoverEvents();
+            setupReactionUIEvents();
+            scrollToBottom();
+        })
+        .catch(console.error);
+}
+
+// === Utility Functions === //
+function scrollToBottom() {
+    messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
+}
+
+function updateActiveStatus() {
+    const fromId = document.getElementById("FromId")?.value;
+    if (fromId) {
+        connection.invoke("SendCurrentActiveStatus", fromId).catch(console.error);
+    }
+}
+
+setInterval(updateActiveStatus, 60000);
+
+// === Typing Indicator === //
+function showTypingIndicator() {
+    if (document.getElementById("TypingBalon")) return;
+    const div = document.createElement("div");
     div.id = "TypingBalon";
-    for (var i = 0; i < 3; i++) {
-        var span = document.createElement("span");
-        span.classList.add("dot");
+    div.className = "message received typing left";
+    for (let i = 0; i < 3; i++) {
+        const span = document.createElement("span");
+        span.className = "dot";
         div.appendChild(span);
     }
-    chatContainer.appendChild(div);
-    messageEl.scrollTop = messagesDiv.scrollHeight;
-});
-connection.on("ReceiveStopTyping", function () {
-    var messageEl = document.getElementById("TypingBalon");
-    messageEl.classList.add("hidden");
-    setTimeout(() => {
-        messageEl.style.display = "none";
-        messageEl.remove();
-    }, 400);
-    setTimeout(() => {
-        const chatContainer = document.getElementsByClassName("messages");
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 100);
-});
-connection.on("OnlineUsers", function (OnlineFriendIds)
-{
-    OnlineFriendIds.forEach(function (id) {
-        var userDiv = document.getElementById(id);
-        userDiv.style.display = "inline";
-    });
-});
+    messagesContainer.appendChild(div);
+    scrollToBottom();
+}
 
-connection.on("FriendDisconnected", function (userId) {
-    var userDiv = document.getElementById(userId);
-        userDiv.style.display = "none";
-});
-connection.on("FriendConnected", function (userId) {
-    var userDiv = document.getElementById(userId);
-    userDiv.style.display = "inline";
-});
-connection.on("ReceiveSeen", function (messageId) {
-    const elements = document.querySelectorAll(".read-status-message");
-    const lastElement = elements[elements.length - 1];
-    if (lastElement) {
-        lastElement.remove();
-    }
-    var message = document.getElementById(messageId);
-    var small = document.createElement("small");
-    small.classList.add("read-status-message");
-    var strong = document.createElement("strong");
-    strong.innerText = "Read";
-    small.appendChild(strong);
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const currentTime = `${hours}:${minutes}`;
-    small.appendChild(document.createTextNode(" "+currentTime));
-    message.parentElement.appendChild(small);
-    var messagesDiv = document.getElementById("messages");
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-});
+function hideTypingIndicator() {
+    const el = document.getElementById("TypingBalon");
+    if (!el) return;
+    el.classList.add("hidden");
+    setTimeout(() => el.remove(), 400);
+    setTimeout(scrollToBottom, 100);
+}
 
-connection.on("ReceiveGlobalDeleteMessage", function (MessageId) {
-    var message = document.getElementById(MessageId);
-    message.classList.add("message-removed");
-    message.innerText = "Message Removed";
-    var parentDiv = message.parentElement;
-    parentDiv.classList.add("no-click");
-});
-connection.on("ReceiveLocalDeleteMessage", function (MessageId) {
-    var message = document.getElementById(MessageId);
-    var parentDiv = message.parentElement;
-    parentDiv.style.display = "none";
-});
-connection.on("ReceiveMessageReaction", function (MessageId, Reaction, UserId) {
-    var messageBallon = document.getElementById(MessageId);
-    var messageBallonParent = messageBallon.parentElement;
-    //var ReactionContainer = document.createElement("div");
-    //reactionContainer.classList.add("messageBallonParent");
-    var messageReaction = messageBallonParent.querySelector(".message-reaction");
-    if (!messageReaction) {
-        var div = document.createElement("div");
-        div.classList.add("message-reaction");
-        if (messageBallon.classList.contains('received')) {
-            div.classList.add("left");
-        } else { 
-            div.classList.add("right");
-        }
-        messageReaction = div;
-    }
+function removeTypingIndicator() {
+    const el = document.getElementById("TypingBalon");
+    if (el) el.remove();
+}
 
-
-    var p = messageBallonParent.querySelector("[data-user-id='" + UserId + "']");
-
-
-    if (!p) {
-        p = document.createElement("p");
-        p.setAttribute("data-user-id", UserId);
-        messageReaction.appendChild(p);
-    }
-
-    switch (Reaction) {
-        case "Love":
-            p.innerText = "♥️";
-            break;
-        case "Like":
-            p.innerText = "👍";
-            break;
-        case "Laugh":
-            p.innerText = "😂";
-            break;
-        case "Smile":
-            p.innerText = "😊";
-            break;
-        case "Angry":
-            p.innerText = "😡";
-            break;
-        default:
-            return;
-    }
-
-    messageBallon.appendChild(div);
-});
-
-connection.on("ReceiveActiveString", function (ActiveString) {
-    var ActiveEl = document.getElementById("last-active");
-    ActiveEl.innerText = ActiveString;
-});
-connection.on("ReceiveMessageNotification", function (CurrConversation) {
-    const Conversation = document.querySelector(`[data-conversation-id='${CurrConversation}']`);
-    Conversation.querySelector(".new-message").style.display = "block";
-});
-
-connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
-    connection.invoke("GetOnlineUsers", friendIds).catch(function (err) {
-        return console.error(err.toString());
-    });
-}).catch(function (err) {
-    return console.error(err.toString());
-});
-document.querySelectorAll(".ConversationChanger").forEach(function (element) {
-    element.addEventListener("click", function (event) {
-
-        var userId = this.getAttribute("data-user-id");
-        var conversationId = this.getAttribute("data-conversation-id");
-
-        connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
-            .then(function () {
-                window.location.href = "/Home/Index?id=" + userId;
-            })
-            .catch(function (err) {
-                console.error(err.toString());
-            });
-    });
-});
-
-
-document.getElementById("Content").addEventListener("input", function (event) {
-    clearTimeout(typingTimer);
-    var ToId = document.getElementById("ToId").value;
-    var FromId = document.getElementById("FromId").value;
-    connection.invoke("SendTyping", FromId, ToId).catch(function (err) {
-        return console.error(err.toString());
-    });
-    typingTimer = setTimeout(function () {
-        connection.invoke("SendStopTyping", FromId, ToId).catch(function (err) {
-            return console.error(err.toString());
-        });
-    }, doneTypingInterval);
-})
-document.getElementById("sendButton").addEventListener("click", function (event) {
-    var message = document.getElementById("Content").value;
-    var ToId = document.getElementById("ToId").value;
-    var FromId = document.getElementById("FromId").value;
-    connection.invoke("SendMessage", FromId, ToId, message).catch(function (err) {
-        return console.error(err.toString());
-    });
+// === Message Handling === //
+function sendMessage(event) {
     event.preventDefault();
-});
-document.getElementById("messages").addEventListener("click", function (event) {
-    const deleteBtn = event.target.closest(".message-options.deleteOwnMessage");
-    if (deleteBtn) {
-        const messageRow = deleteBtn.closest(".message-row");
-        if (messageRow) {
-            const message = messageRow.querySelector(".message");
-            if (message) {
-                const MessageId = message.id;
-                const ToId = document.getElementById("ToId").value;
-                const FromId = document.getElementById("FromId").value;
-
-                connection.invoke("SendGlobalDeleteMessage", FromId, ToId, MessageId).catch(function (err) {
-                    console.error(err.toString());
-                });
-            }
-        }
+    const content = document.getElementById("Content")?.value;
+    const toId = document.getElementById("ToId")?.value;
+    const fromId = document.getElementById("FromId")?.value;
+    if (content && toId && fromId) {
+        connection.invoke("SendMessage", fromId, toId, content).catch(console.error);
     }
-});
-
-document.querySelectorAll(".message-row").forEach(function (element) {
-    const deleteBtn = element.querySelector(".message-options.deleteSenderMessage");
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", function () {
-            const message = element.querySelector(".message");
-            if (message) {
-                const MessageId = message.id;
-                var FromId = document.getElementById("FromId").value;
-                connection.invoke("SendLocalDeleteMessage", FromId, MessageId).catch(function (err) {
-                    console.error(err.toString());
-                });
-            }
-        });
-    }
-});
-
-function UpdateActiveStatus() {
-    const User = document.getElementById("FromId").value;
-    connection.invoke("SendCurrentActiveStatus",User).catch(function (err) {
-        console.error(err.toString());
-    });
-}
-setInterval(UpdateActiveStatus, 1 * 60 * 1000);
-
-//another js
-window.addEventListener("load", function () {
-    var messagesDiv = document.getElementById("messages");
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-});
-
-
-messagesContainer.addEventListener("mouseover", function (event) {
-    const messageRow = event.target.closest(".message-row");
-    if (messageRow && messagesContainer.contains(messageRow)) {
-        const options = messageRow.querySelectorAll(".message-options");
-        if (options.length > 0) {
-            options.forEach(opt => opt.style.display = "block");
-        }
-    }
-});
-
-messagesContainer.addEventListener("mouseout", function (event) {
-    const messageRow = event.target.closest(".message-row");
-    if (messageRow && messagesContainer.contains(messageRow)) {
-        const options = messageRow.querySelectorAll(".message-options");
-        if (options.length > 0) {
-            options.forEach(opt => opt.style.display = "none");
-        }
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById("messages").addEventListener('click', function (e) {
-        if (e.target.classList.contains('React')) {
-            e.stopPropagation();
-
-            document.querySelectorAll('.reaction-container').forEach(c => c.style.display = 'none');
-
-            const messageRow = e.target.closest('.message-row');
-            const reactionContainer = messageRow.querySelector('.reaction-container');
-            if (reactionContainer) {
-                reactionContainer.style.display = 'flex';
-            }
-        }
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.reaction-container') && !e.target.classList.contains('React')) {
-            document.querySelectorAll('.reaction-container').forEach(c => c.style.display = 'none');
-        }
-    });
-
-    document.getElementById("messages").addEventListener('click', function (e) {
-        if (e.target.classList.contains('reaction-button')) {
-            const reactionType = e.target.classList.contains('love-reaction') ? 'Love' :
-                e.target.classList.contains('like-reaction') ? 'Like' :
-                    e.target.classList.contains('laugh-reaction') ? 'Laugh' :
-                        e.target.classList.contains('smile-reaction') ? 'Smile' :
-                            e.target.classList.contains('angry-reaction') ? 'Angry' : null;
-            if (reactionType) {
-                const ToId = document.getElementById("ToId").value;
-                const FromId = document.getElementById("FromId").value;
-                const parent = e.target.closest(".message-row"); 
-                const message = parent.querySelector(".message");
-                const messageId = message.id;
-                connection.invoke("SendMessageReaction", messageId, reactionType, FromId, ToId)
-                    .catch(function (err) {
-                        console.error(err.toString());
-                    });
-
-                const reactionContainer = parent.querySelector('.reaction-container');
-                if (reactionContainer) {
-                    reactionContainer.style.display = 'none';
-                }
-            }
-        }
-    });
-});
-
-function createMessageOptionsIcons(DeleteClass,order) {
-    var divDelete = document.createElement("div");
-    divDelete.classList.add("message-options");
-    divDelete.classList.add(DeleteClass);
-    divDelete.style.order = order;
-    divDelete.innerText = "🗑️";
-
-    var divReact = document.createElement("div");
-    divReact.classList.add("message-options");
-    divReact.classList.add("React");
-    divReact.style.order = order;
-    divReact.innerText = "😃";
-    return { divDelete, divReact };
 }
 
+function handleReceiveMessage(messageId, message) {
+    removeTypingIndicator();
+    const msgRow = createMessageRow("received", messageId, message, "deleteSenderMessage", "3");
+    messagesContainer.appendChild(msgRow);
+    scrollToBottom();
+}
+
+function handleSendMessage(messageId, message) {
+    const msgRow = createMessageRow("sent", messageId, message, "deleteOwnMessage", "1");
+    messagesContainer.appendChild(msgRow);
+    scrollToBottom();
+}
+
+function createMessageRow(type, messageId, text, deleteClass, order) {
+    const row = document.createElement("div");
+    row.className = `message-row ${type === 'sent' ? 'from right' : 'to left'}`;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `message ${type}`;
+    msgDiv.id = messageId;
+    msgDiv.textContent = text;
+    
+    const reactionContainer = createReactionContainer();
+    const { divDelete, divReact } = createMessageOptionsIcons(deleteClass, order);
+
+    row.appendChild(reactionContainer);
+    row.append(msgDiv, divDelete, divReact);
+    return row;
+}
+
+// === Message Reactions === //
 function createReactionContainer() {
-    const container = document.createElement('div');
-    container.classList.add('reaction-container');
-    const reactions = [
-        { class: 'love-reaction', emoji: '♥️' },
-        { class: 'like-reaction', emoji: '👍' },
-        { class: 'laugh-reaction', emoji: '😂' },
-        { class: 'smile-reaction', emoji: '😊' },
-        { class: 'angry-reaction', emoji: '😡' }
-    ];
-
-    reactions.forEach(reaction => {
-        const reactionButton = document.createElement('p');
-        reactionButton.classList.add('reaction-button', reaction.class);
-        reactionButton.textContent = reaction.emoji;
-        container.appendChild(reactionButton);
+    const container = document.createElement("div");
+    container.className = "reaction-container";
+    const reactions = ["Love", "Like", "Laugh", "Smile", "Angry"];
+    const emojis = ["♥️", "👍", "😂", "😊", "😡"];
+    reactions.forEach((r, i) => {
+        const p = document.createElement("p");
+        p.className = `reaction-button ${r.toLowerCase()}-reaction`;
+        p.textContent = emojis[i];
+        container.appendChild(p);
     });
-
     return container;
 }
 
+function createMessageOptionsIcons(deleteClass, order) {
+    const del = document.createElement("div");
+    del.className = `message-options ${deleteClass}`;
+    del.style.order = order;
+    del.innerText = "🗑️";
+
+    const react = document.createElement("div");
+    react.className = "message-options React";
+    react.style.order = order;
+    react.innerText = "😃";
+
+    return { divDelete: del, divReact: react };
+}
+
+function handleMessageReaction(messageId, reaction, userId) {
+    const msg = document.getElementById(messageId);
+    const parent = msg;
+    if (!msg || !parent) return;
+
+    let container = parent.querySelector(".message-reaction");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = `message-reaction ${msg.classList.contains("received") ? "left" : "right"}`;
+        parent.appendChild(container);
+    }
+
+    let p = container.querySelector(`[data-user-id="${userId}"]`);
+    if (!p) {
+        p = document.createElement("p");
+        p.setAttribute("data-user-id", userId);
+        container.appendChild(p);
+    }
+
+    const emojiMap = {
+        Love: "♥️", Like: "👍", Laugh: "😂", Smile: "😊", Angry: "😡"
+    };
+    if (emojiMap[reaction]) p.innerText = emojiMap[reaction];
+}
+
+// === Message Delete === //
+function handleOwnMessageDelete(event) {
+    const deleteBtn = event.target.closest(".deleteOwnMessage");
+    if (!deleteBtn) return;
+    const msg = deleteBtn.closest(".message-row")?.querySelector(".message");
+    if (msg) {
+        const msgId = msg.id;
+        const toId = document.getElementById("ToId").value;
+        const fromId = document.getElementById("FromId").value;
+        connection.invoke("SendGlobalDeleteMessage", fromId, toId, msgId).catch(console.error);
+    }
+}
+
+function setupSenderMessageDelete(row) {
+    const btn = row.querySelector(".deleteSenderMessage");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            const msg = row.querySelector(".message");
+            if (msg) {
+                const msgId = msg.id;
+                const fromId = document.getElementById("FromId").value;
+                connection.invoke("SendLocalDeleteMessage", fromId, msgId).catch(console.error);
+            }
+        });
+    }
+}
+
+function handleGlobalDeleteMessage(messageId) {
+    const msg = document.getElementById(messageId);
+    if (msg) {
+        msg.classList.add("message-removed");
+        msg.innerText = "Message Removed";
+        msg.parentElement.classList.add("no-click");
+    }
+}
+
+function handleLocalDeleteMessage(messageId) {
+    const msg = document.getElementById(messageId);
+    if (msg) msg.parentElement.style.display = "none";
+}
+
+// === Additional Features === //
+function markMessageAsSeen(messageId) {
+    document.querySelectorAll(".read-status-message").forEach(el => el.remove());
+    const message = document.getElementById(messageId);
+    const small = document.createElement("small");
+    small.className = "read-status-message";
+    const strong = document.createElement("strong");
+    strong.innerText = "Read";
+    const now = new Date();
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    small.append(strong, ` ${time}`);
+    message.parentElement.appendChild(small);
+    scrollToBottom();
+}
+
+function updateLastActive(status) {
+    const el = document.getElementById("last-active");
+    if (el) el.innerText = status;
+}
+
+function showOnlineFriends(ids) {
+    ids.forEach(id => toggleFriendOnlineStatus(id, true));
+}
+
+function toggleFriendOnlineStatus(id, isOnline) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isOnline ? "inline" : "none";
+}
+
+function showNewMessageNotification(conversationId) {
+    const el = document.querySelector(`[data-conversation-id='${conversationId}'] .new-message`);
+    if (el) el.style.display = "block";
+}
+
+// === Typing Events === //
+function handleTyping() {
+    clearTimeout(typingTimer);
+    const toId = document.getElementById("ToId").value;
+    const fromId = document.getElementById("FromId").value;
+    connection.invoke("SendTyping", fromId, toId).catch(console.error);
+
+    typingTimer = setTimeout(() => {
+        connection.invoke("SendStopTyping", fromId, toId).catch(console.error);
+    }, doneTypingInterval);
+}
+
+// === UI Hover Events === //
+function setupMessageHoverEvents() {
+    messagesContainer?.addEventListener("mouseover", e => {
+        const row = e.target.closest(".message-row");
+        row?.querySelectorAll(".message-options").forEach(opt => opt.style.display = "block");
+    });
+
+    messagesContainer?.addEventListener("mouseout", e => {
+        const row = e.target.closest(".message-row");
+        row?.querySelectorAll(".message-options").forEach(opt => opt.style.display = "none");
+    });
+}
+
+// === Reaction UI Events === //
+function setupReactionUIEvents() {
+    const messages = document.getElementById("messages");
+
+    messages?.addEventListener("click", e => {
+        if (e.target.classList.contains("React")) {
+            e.stopPropagation();
+            document.querySelectorAll(".reaction-container").forEach(c => c.style.display = "none");
+            const container = e.target.closest(".message-row")?.querySelector(".reaction-container");
+            if (container) container.style.display = "flex";
+        }
+
+        if (e.target.classList.contains("reaction-button")) {
+            const reaction = e.target.className.match(/(love|like|laugh|smile|angry)/)?.[0];
+            const reactionType = reaction?.charAt(0).toUpperCase() + reaction?.slice(1);
+            const toId = document.getElementById("ToId").value;
+            const fromId = document.getElementById("FromId").value;
+            const row = e.target.closest(".message-row");
+            const msgId = row?.querySelector(".message")?.id;
+
+            if (reactionType && msgId) {
+                connection.invoke("SendMessageReaction", msgId, reactionType, fromId, toId).catch(console.error);
+                row.querySelector(".reaction-container").style.display = "none";
+            }
+        }
+    });
+
+    document.addEventListener("click", e => {
+        if (!e.target.closest(".reaction-container") && !e.target.classList.contains("React")) {
+            document.querySelectorAll(".reaction-container").forEach(c => c.style.display = "none");
+        }
+    });
+}

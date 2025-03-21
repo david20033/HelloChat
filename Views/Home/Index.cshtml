@@ -1,5 +1,5 @@
 ﻿@using HelloChat.Enums
-@model HelloChat.ViewModels.HomeViewModel
+@model ICollection<HelloChat.ViewModels.FriendsViewModel>
 @section Styles {
     <link href="/css/Home.css" rel="stylesheet" />
 }
@@ -8,7 +8,8 @@
     <div class="friends-list">
         <h2>Conversations</h2>
         <input type="text" class="search-box" placeholder="Search friends...">
-            @foreach (var item in Model.Friends)
+        <input type="hidden" id="FromId" value="@ViewBag.FromId">
+            @foreach (var item in Model)
             {
                 <input type="hidden" class="friend-id" value="@item.UserId" />
             <div class="friend ConversationChanger" data-user-id="@item.UserId" data-conversation-id="@item.ConversationId">
@@ -39,67 +40,11 @@
                 </div>
             }
     </div>
-    <div class="chat-container">
-        <div class="header">
-                <img src="@Model.ProfilePicturePath" alt="profile-picture">
-            <div class="user-info">
-                <div class="name"><b>@Model.Name</b></div>
-                <div class="status">@Model.ActiveString</div>
-            </div>
-        </div>
-        <div class="messages" id="messages">
-            <small>06.03 14:49</small>
-            @foreach(var m in Model.Messages)
-            {
-                string DivClass = "";
-                string PClass = "";
-                if (m.isDeleted)
-                {
-                    DivClass = "no-click";
-                    PClass = "message-removed";
-                }
-                if(m.Id==Model.LastSeenMessageId){
-                    ViewData["Position"] = "right";
-                    <div class="message-row from right @DivClass" style="margin-bottom:10px;">
-                        <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
-                        <div class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
-                        <div class="message-options React" style="order: 1;">😃</div>
-                        <small class="read-status-message"><strong>Read</strong> @(m.SeenTime.HasValue ? m.SeenTime.Value.ToString("HH:mm") : "")</small>
-                        <partial name="_ReactionContainerPartial" /> 
-                    </div>
-                    continue;
-                }
-                if(Model.SenderId==m.From_id&&!m.isLocalDeleted){
-                    ViewData["Position"] = "left";
-                    <div class="message-row to left @DivClass">
-                        <div class="message received @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
-                        <div class="message-options deleteSenderMessage" style="order: 3;">🗑️</div>
-                        <div class="message-options React" style="order: 3;">😃</div>
-                        <partial name="_ReactionContainerPartial" />
-                    </div>
-            }
-            if (Model.ReceiverId == m.From_id)
-            {
-                    ViewData["Position"] = "right";
-                    <div class="message-row from right @DivClass">
-                        <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
-                        <div class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
-                        <div class="message-options React" style="order: 1;">😃</div>
-                        <partial name="_ReactionContainerPartial" />
-                    </div>
-            }
-        }
+    <div class="chat-container" id="chat-container">
     </div>
-        <form id="friendRequestForm" asp-controller="Home" asp-action="SendMessage" method="post">
-            <div class="input-container">
-                <input type="hidden" id="ToId" name="ToId" value="@Model.SenderId">
-                <input type="hidden" id="FromId"  value="@ViewBag.FromId">
-                <input class="message-input" type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
-                <button type="submit" id="sendButton">Send</button>
-            </div>
-        </form>
-  </div>
 </div>
+    
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/chat.js"></script>
+
     

@@ -7,6 +7,7 @@ using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HelloChat.Controllers
 {
@@ -21,14 +22,14 @@ namespace HelloChat.Controllers
             _logger = logger;
             _homeService = homeService;
         }
-        public async Task<IActionResult> Index(string id)
+        public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(); 
             }
-            var model = await _homeService.GetConversationsViewModel(userId,id);
+            var model = await _homeService.GetFriendsViewModel(userId);
 
             ViewBag.FromId = userId;
             return View(model);
@@ -63,6 +64,16 @@ namespace HelloChat.Controllers
             }
             var users= await _homeService.GetIdentityUsersBySearchQuery(query);
             return View(users);
+        }
+        public async Task<IActionResult> LoadConversation(string conversationId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var Conversation  = await _homeService.GetConversationViewModel(Guid.Parse(conversationId),userId);
+            return PartialView("_MessagesPartial",Conversation);
         }
         public IActionResult Privacy()
         {

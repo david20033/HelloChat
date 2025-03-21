@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+
 namespace HelloChat.Repositories
 {
     public class AppRepository : IAppRepository
@@ -18,13 +19,13 @@ namespace HelloChat.Repositories
         {
             _context = context;
         }
-        public async Task<HomeViewModel> GetHomeViewModelAsync(string CurrentUserId, string User2Id)
+        public async Task<List<FriendsViewModel>> GetFriendsViewModelAsync(string CurrentUserId)
         {
             var CurrentUser = await _context.Users
                 .Include(u => u.FriendshipsInitiated)
                 .Include(u => u.FriendshipsReceived)
                 .FirstAsync(u => u.Id == CurrentUserId);
-            var User2 = await _context.Users.FirstOrDefaultAsync(u => u.Id == User2Id);
+            //var User2 = await _context.Users.FirstOrDefaultAsync(u => u.Id == User2Id);
             var Friendships = CurrentUser.FriendshipsInitiated.Concat(CurrentUser.FriendshipsReceived);
             List<FriendsViewModel> FriendsList = [];
             foreach (var f in Friendships)
@@ -71,39 +72,68 @@ namespace HelloChat.Repositories
                 }
                 FriendsList.Add(FriendModel);
             }
-            var Conversation = await GetConversationAsync(CurrentUserId, User2Id);
-            if (Conversation == null && !User2Id.IsNullOrEmpty())
-            {
-                Conversation = new Conversation
-                {
-                    Id = Guid.NewGuid(),
-                    User1Id = CurrentUserId,
-                    User2Id = User2Id,
-                };
-                await _context.Conversation.AddAsync(Conversation);
-                await _context.SaveChangesAsync();
-            }
-            Message? lastSeenMessage = null;
-            if (!User2Id.IsNullOrEmpty())
-            {
-                lastSeenMessage = Conversation
-                    .Messages
-                    .Where(m => m.isSeen == true && m.To_id == User2Id)
-                    .OrderByDescending(m => m.SeenTime)
-                    .FirstOrDefault();
-            }
-            string active = await GetUserActiveString(User2Id);
+            return FriendsList;
+            //var Conversation = await GetConversationAsync(CurrentUserId, User2Id);
+            //if (Conversation == null && !User2Id.IsNullOrEmpty())
+            //{
+            //    Conversation = new Conversation
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        User1Id = CurrentUserId,
+            //        User2Id = User2Id,
+            //    };
+            //    await _context.Conversation.AddAsync(Conversation);
+            //    await _context.SaveChangesAsync();
+            //}
+            //Message? lastSeenMessage = null;
+            //if (!User2Id.IsNullOrEmpty())
+            //{
+            //    lastSeenMessage = Conversation
+            //        .Messages
+            //        .Where(m => m.isSeen == true && m.To_id == User2Id)
+            //        .OrderByDescending(m => m.SeenTime)
+            //        .FirstOrDefault();
+            //}
+            //string active = await GetUserActiveString(User2Id);
+            //return new HomeViewModel
+            //{
+            //    CurrentConversationId = Conversation?.Id ?? Guid.Empty,
+            //    ProfilePicturePath = User2?.ProfilePicturePath??"",
+            //    Friends = FriendsList,
+            //    Messages = Conversation?.Messages
+            //    .OrderBy(m => m.CreatedDate)
+            //    .Skip((pageNumber - 1) * pageSize)  
+            //    .Take(pageSize)  
+            //    .ToList() ?? new List<Message>(),
+            //    ActiveString = active,
+            //    Name = $"{User2?.FirstName} {User2?.LastName}",
+            //    SenderId = User2Id,
+            //    ReceiverId = CurrentUserId,
+            //    LastSeenMessageId = lastSeenMessage?.Id,
+            //};
+        }
+        public async Task<HomeViewModel> GetConversationViewModel(Guid ConversationId,string SenderId)
+        {
+            var ReceiverId= await GetAnotherUserIdInConversationAsync(SenderId, ConversationId);
+            var Receiver = await _context.Users.FirstAsync(u=>u.Id==ReceiverId);
+            var Conversation = await _context
+                .Conversation
+                .Include(c=>c.Messages)
+                .FirstAsync(c => c.Id == ConversationId);
+            var lastSeenMessage = Conversation
+                .Messages
+                .Where(m => m.isSeen == true && m.To_id == ReceiverId)
+                .OrderByDescending(m => m.SeenTime)
+                .FirstOrDefault();
             return new HomeViewModel
             {
-                CurrentConversationId = Conversation?.Id ?? Guid.Empty,
-                ProfilePicturePath = User2?.ProfilePicturePath??"",
-                Friends = FriendsList,
-                Messages = Conversation?.Messages.OrderBy(m => m.CreatedDate).ToList() ?? new List<Message>(),
-                ActiveString = active,
-                Name = $"{User2?.FirstName} {User2?.LastName}",
-                SenderId = User2Id,
-                ReceiverId = CurrentUserId,
-                LastSeenMessageId = lastSeenMessage?.Id,
+                CurrentConversationId = ConversationId,
+                Messages = Conversation.Messages.OrderBy(m => m.CreatedDate).ToList(),
+                SenderId = SenderId,
+                ReceiverId = ReceiverId,
+                Name = $"{Receiver.FirstName} {Receiver.LastName}",
+                ProfilePicturePath = Receiver.ProfilePicturePath,
+                LastSeenMessageId= lastSeenMessage?.Id
             };
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
@@ -415,5 +445,6 @@ namespace HelloChat.Repositories
             user.ProfilePicturePath = PicturePath;
             await _context.SaveChangesAsync();
         }
+
     }
 }

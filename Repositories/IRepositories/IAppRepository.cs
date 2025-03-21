@@ -7,7 +7,8 @@ namespace HelloChat.Repositories.IRepositories
 {
     public interface IAppRepository
     {
-        Task<HomeViewModel> GetHomeViewModelAsync(string CurrentUserId, string User2Id);
+        Task<List<FriendsViewModel>> GetFriendsViewModelAsync(string CurrentUserId);
+        Task<HomeViewModel> GetConversationViewModel(Guid ConversationId, string SenderId);
         Task<List<ApplicationUser>> GetUsersBySearchQuery(string query);
         Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId);
         Task AddFriendRequest(string FromId, string ToId);
