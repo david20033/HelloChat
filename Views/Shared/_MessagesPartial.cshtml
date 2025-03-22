@@ -9,7 +9,7 @@
 {
     string DivClass = "";
     string PClass = "";
-    bool isLastSeen = lastSeenMessageId != null && m.Id == Guid.Parse(lastSeenMessageId);
+    bool isLastSeen = lastSeenMessageId != "" && lastSeenMessageId != null && m.Id == Guid.Parse(lastSeenMessageId);
     if (m.isDeleted)
     {
         DivClass = "no-click";
