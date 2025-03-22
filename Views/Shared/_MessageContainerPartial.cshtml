@@ -1,0 +1,25 @@
+﻿@model HelloChat.ViewModels.HomeViewModel
+    <div class="header">
+        <img src="@Model.ProfilePicturePath" alt="profile-picture">
+        <div class="user-info">
+            <div class="name"><b>@Model.Name</b></div>
+            <div class="status">@Model.ActiveString</div>
+        </div>
+    </div>
+    <div class="messages" id="messages">
+        <small>06.03 14:49</small>
+        @{
+        ViewData["LastSeenMessageId"] = Model.LastSeenMessageId;
+        ViewData["SenderId"] = Model.SenderId;
+        ViewData["ReceiverId"] = Model.ReceiverId;
+        }
+    <partial name="_MessagesPartial" model="@Model.Messages.ToList()" />
+</div>
+        <form id="friendRequestForm" asp-controller="Home" asp-action="SendMessage" method="post">
+            <div class="input-container">
+                <input type="hidden" id="ToId" name="ToId" value="@Model.ReceiverId">
+        <input type="hidden" id="FromId" name="FromId" value="@Model.SenderId">
+                <input class="message-input" type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
+                <button type="submit" id="sendButton">Send</button>
+            </div>
+        </form>

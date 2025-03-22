@@ -10,5 +10,9 @@ namespace HelloChat.Services.IServices
         Task<List<ApplicationUser>> GetIdentityUsersBySearchQuery(string query);
         Task SendMessage(string FromId, string ToId, string Content);
         Task<HomeViewModel> GetConversationViewModel(Guid ConversationId, string SenderId);
+
+        Task<List<Message>> LoadMessages(Guid ConversationId, int page);
+        Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId);
+        Task<string> GetAnotherUserId(Guid ConversationId, string UserId);
     }
 }

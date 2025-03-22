@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Drawing.Printing;
+using System.Security.Claims;
 using HelloChat.Controllers;
 using HelloChat.Data;
 using HelloChat.Enums;
@@ -40,7 +41,7 @@ namespace HelloChat.Repositories
                     user = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
                 }
                 var Message = _context.Messages
-                    .Where(m => m.To_id == CurrentUserId && m.From_id == user.Id)
+                    .Where(m => m.From_id == CurrentUserId && m.To_id == user.Id)
                     .OrderByDescending(m => m.CreatedDate)
                     .FirstOrDefault();
                 var FriendModel = new FriendsViewModel
@@ -129,7 +130,11 @@ namespace HelloChat.Repositories
             return new HomeViewModel
             {
                 CurrentConversationId = ConversationId,
-                Messages = Conversation.Messages.OrderBy(m => m.CreatedDate).ToList(),
+                Messages = Conversation.Messages
+                .OrderByDescending(m => m.CreatedDate)
+                .Take(10)
+                .OrderBy(m => m.CreatedDate)
+                .ToList(),
                 SenderId = SenderId,
                 ReceiverId = ReceiverId,
                 Name = $"{Receiver.FirstName} {Receiver.LastName}",
@@ -137,6 +142,29 @@ namespace HelloChat.Repositories
                 LastSeenMessageId= lastSeenMessage?.Id,
                 ActiveString= active
             };
+        }
+        public async Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId)
+        {
+            var Conversation = await _context
+                .Conversation
+                .Include(c => c.Messages)
+                .FirstAsync(c => c.Id == ConversationId);
+            var lastSeenMessage = Conversation
+                .Messages
+                .Where(m => m.isSeen == true && m.To_id == ReceiverId)
+                .OrderByDescending(m => m.SeenTime)
+                .FirstOrDefault();
+            return lastSeenMessage?.Id;
+        }
+        public async Task<List<Message>> LoadMessages(Guid ConversationId, int page)
+        {
+            return await _context.Messages
+                .Where(m => m.ConversationId == ConversationId)
+                .OrderByDescending(m => m.CreatedDate)
+                .Skip((page - 1) * 10)
+                .Take(10)
+                .OrderBy(m => m.CreatedDate)
+                .ToListAsync();
         }
         public async Task<List<ApplicationUser>> GetUsersBySearchQuery(string query)
         {

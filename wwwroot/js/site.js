@@ -6,6 +6,9 @@ const friendIds = Array.from(document.querySelectorAll(".friend-id")).map(input 
 var messagesContainer;
 let typingTimer;
 const doneTypingInterval = 1000;
+let page = 1;
+let isLoading = false;
+var currentConversationId = null;
 
 connection.on("ReceiveMessage", handleReceiveMessage);
 connection.on("SendMessage", handleSendMessage);
@@ -33,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
 });
 
+
+
 function setupCommonEvents() {
     messagesContainer = document.getElementById("messages");
     const sendButton = document.getElementById("sendButton");
@@ -45,6 +50,13 @@ function setupCommonEvents() {
 
     if (messagesContainer) {
         messagesContainer.addEventListener("click", handleOwnMessageDelete);
+        messagesContainer.addEventListener("scroll", function () {
+            const container = this;
+            if (container.scrollTop <= 10) {
+                
+                loadMoreMessages(currentConversationId);
+            }
+        });
     }
 }
 
@@ -52,6 +64,8 @@ function setupConversationSwitching() {
     document.querySelectorAll(".ConversationChanger").forEach(el => {
         el.addEventListener("click", () => {
             const conversationId = el.getAttribute("data-conversation-id");
+            currentConversationId = conversationId;
+            page = 1;
             connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
                 .then(() => renderPartialConversation(conversationId))
                 .catch(console.error);
@@ -75,6 +89,23 @@ function renderPartialConversation(conversationId) {
             scrollToBottom();
         })
         .catch(console.error);
+}
+function loadMoreMessages(conversationId) {
+    if (isLoading) return;
+    isLoading = true;
+    page++;
+
+    fetch(`/Home/LoadMessages?conversationId=${conversationId}&page=${page}&SenderId=${currentUserId}`)
+        .then(res => res.text())
+        .then(html => {
+            const container = document.getElementById("messages");
+            container.insertAdjacentHTML("afterbegin", html);
+            isLoading = false;
+        })
+        .catch(error => {
+            console.error(error);
+            isLoading = false;
+        });
 }
 
 function scrollToBottom() {

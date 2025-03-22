@@ -30,5 +30,18 @@ namespace HelloChat.Services
         {
             return await _repository.GetConversationViewModel(ConversationId, SenderId);
         }
+        public async Task<List<Message>> LoadMessages(Guid ConversationId, int page)
+        {
+            return await _repository.LoadMessages(ConversationId, page);
+        
+        }
+        public async Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId)
+        {
+            return await _repository.GetLastSeenMessageId(ConversationId, ReceiverId);
+        }
+        public async Task<string> GetAnotherUserId(Guid ConversationId, string UserId)
+        {
+            return await _repository.GetAnotherUserIdInConversationAsync(UserId,ConversationId);
+        }
     }
 }

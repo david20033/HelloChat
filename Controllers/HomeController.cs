@@ -73,7 +73,17 @@ namespace HelloChat.Controllers
                 return Unauthorized();
             }
             var Conversation  = await _homeService.GetConversationViewModel(Guid.Parse(conversationId),userId);
-            return PartialView("_MessagesPartial",Conversation);
+            return PartialView("_MessageContainerPartial", Conversation);
+        }
+        public async Task<IActionResult> LoadMessages(string conversationId, int page,string SenderId)
+        {
+            var ReceiverId = await _homeService.GetAnotherUserId(Guid.Parse(conversationId), SenderId);
+            var LastSeenMessage = await _homeService.GetLastSeenMessageId(Guid.Parse(conversationId), ReceiverId);
+            ViewData["LastSeenMessageId"] = LastSeenMessage;
+            ViewData["SenderId"] = SenderId;
+            ViewData["ReceiverId"] = ReceiverId;
+            var messages =await _homeService.LoadMessages(Guid.Parse(conversationId),page);
+            return PartialView("_MessagesPartial", messages);
         }
         public IActionResult Privacy()
         {
