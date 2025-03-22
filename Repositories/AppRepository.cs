@@ -41,7 +41,7 @@ namespace HelloChat.Repositories
                     user = await _context.Users.Where(u => u.Id == f.User1Id).FirstAsync();
                 }
                 var Message = _context.Messages
-                    .Where(m => m.From_id == CurrentUserId && m.To_id == user.Id)
+                    .Where(m => m.To_id == CurrentUserId && m.From_id == user.Id)
                     .OrderByDescending(m => m.CreatedDate)
                     .FirstOrDefault();
                 var FriendModel = new FriendsViewModel
@@ -140,7 +140,7 @@ namespace HelloChat.Repositories
                 Name = $"{Receiver.FirstName} {Receiver.LastName}",
                 ProfilePicturePath = Receiver.ProfilePicturePath,
                 LastSeenMessageId= lastSeenMessage?.Id,
-                ActiveString= active
+                ActiveString= active,
             };
         }
         public async Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId)

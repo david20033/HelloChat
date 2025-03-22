@@ -3,6 +3,7 @@
     var lastSeenMessageId = ViewData["LastSeenMessageId"] as string;
     var senderId = ViewData["SenderId"] as string;
     var receiverId = ViewData["ReceiverId"] as string;
+    DateTime LastMessageTime = default(DateTime);
 }
 
 @foreach (var m in Model)
@@ -10,11 +11,17 @@
     string DivClass = "";
     string PClass = "";
     bool isLastSeen = lastSeenMessageId != "" && lastSeenMessageId != null && m.Id == Guid.Parse(lastSeenMessageId);
+    if ((LastMessageTime - m.CreatedDate).TotalHours >= 1)
+    {
+        <small>@m.CreatedDate</small>
+    }
+    LastMessageTime = m.CreatedDate;
     if (m.isDeleted)
     {
         DivClass = "no-click";
         PClass = "message-removed";
     }
+    @* <small>@m.CreatedDate</small> *@
     if (isLastSeen)
     {
         ViewData["Position"] = "right";
