@@ -60,6 +60,22 @@ function setupCommonEvents() {
             }
         });
     }
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('removeImage').addEventListener('click', function () {
+        document.getElementById('imageInput').value = ""; 
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+    });
 }
 
 function setupConversationSwitching() {
@@ -417,3 +433,4 @@ function setupReactionUIEvents() {
         }
     });
 }
+

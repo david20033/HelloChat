@@ -7,7 +7,7 @@
         </div>
     </div>
     <div class="messages" id="messages">
-        @{
+        @{ 
         ViewData["LastSeenMessageId"] = Model.LastSeenMessageId.ToString();
         ViewData["SenderId"] = Model.SenderId;
         ViewData["ReceiverId"] = Model.ReceiverId;
@@ -15,11 +15,21 @@
     <partial name="_MessagesPartial" model="@Model.Messages.ToList()" />
 </div>
 <form id="chatForm" asp-controller="Home" asp-action="SendMessage" method="post" enctype="multipart/form-data">
-            <div class="input-container">
-                <input type="hidden" id="ToId" name="ToId" value="@Model.ReceiverId">
+    <div class="input-container">
+        <input type="hidden" id="ToId" name="ToId" value="@Model.ReceiverId">
         <input type="hidden" id="FromId" name="FromId" value="@Model.SenderId">
-                <input class="message-input" type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
-        <input type="file" id="imageInput" accept="image/*" />
-                <button type="submit" id="sendButton">Send</button>
+
+        <div class="message-input-wrapper">
+            <div id="imagePreviewContainer" class="image-preview-container">
+                <img id="imagePreview" class="image-preview" src="" alt="Image Preview">
+                <button type="button" id="removeImage" class="remove-image">×</button>
             </div>
-        </form>
+            <input class="message-input" type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
+        </div>
+
+        <label for="imageInput" class="custom-file-upload">🖼️</label>
+        <input type="file" id="imageInput" accept="image/*">
+
+        <button type="submit" id="sendButton">Send</button>
+    </div>
+</form>
