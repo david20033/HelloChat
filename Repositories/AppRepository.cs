@@ -291,10 +291,43 @@ namespace HelloChat.Repositories
                 CreatedDate = DateTime.Now,
                 isSeen = false,
                 SeenTime = null,
+                ImageUrl = null,
             };
             await _context.Messages.AddAsync(Message);
             await _context.SaveChangesAsync();
             return Message.Id;
+        }
+        public async Task<(Guid,string)> SendImageAndReturnItsIdAndUrl(string FromId, string ToId, string imageName, string base64Image)
+        {
+            if (imageName == null || base64Image == null) return (Guid.Empty,"");
+            byte[] imageBytes = Convert.FromBase64String(base64Image);
+            string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "UploadedImages", "ChatImages");
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageName;
+            string filePath = Path.Combine(folderPath, uniqueFileName);
+
+            await File.WriteAllBytesAsync(filePath, imageBytes);
+            string imageUrl = $"/UploadedImages/ChatImages/{uniqueFileName}";
+            var Conversation = await GetConversationAsync(FromId, ToId);
+            var Message = new Message
+            {
+                Id = Guid.NewGuid(),
+                Conversation = Conversation,
+                ConversationId = Conversation.Id,
+                From_id = FromId,
+                To_id = ToId,
+                Content = "Photo message",
+                CreatedDate = DateTime.Now,
+                isSeen = false,
+                SeenTime = null,
+                ImageUrl = imageUrl,
+            };
+            await _context.Messages.AddAsync(Message);
+            await _context.SaveChangesAsync();
+            return (Message.Id,imageUrl);
         }
         public async Task<List<string>> GetUserFriendIds(string UserId)
         {

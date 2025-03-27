@@ -12,6 +12,8 @@ var currentConversationId = null;
 
 connection.on("ReceiveMessage", handleReceiveMessage);
 connection.on("SendMessage", handleSendMessage);
+connection.on("ReceiveImage", handleReceiveImage);
+connection.on("SendImage", handleSendImage);
 connection.on("ReceiveTyping", showTypingIndicator);
 connection.on("ReceiveStopTyping", hideTypingIndicator);
 connection.on("OnlineUsers", showOnlineFriends);
@@ -153,6 +155,22 @@ function sendMessage(event) {
     const content = document.getElementById("Content")?.value;
     const toId = document.getElementById("ToId")?.value;
     const fromId = document.getElementById("FromId")?.value;
+    const imageInput = document.getElementById("imageInput");
+    let imageFile = imageInput.files.length > 0 ? imageInput.files[0] : null;
+    console.log("File selected:", imageFile);
+    debugger;
+    if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const imageData = event.target.result.split(',')[1]; 
+            const imageName = imageFile.name;
+            debugger;
+            connection.invoke("SendImage", fromId, toId, imageName, imageData)
+                .catch(console.error);
+        };
+        imageInput.value = "";
+        reader.readAsDataURL(imageFile); 
+    }
     if (content && toId && fromId) {
         connection.invoke("SendMessage", fromId, toId, content).catch(console.error);
     }
@@ -170,6 +188,17 @@ function handleSendMessage(messageId, message) {
     messagesContainer.appendChild(msgRow);
     scrollToBottom();
 }
+function handleReceiveImage(imageId, ImageUrl) {
+    removeTypingIndicator();
+    const msgRow = createImageMessageRow("received", imageId, ImageUrl, "deleteSenderMessage", "3");
+    messagesContainer.appendChild(msgRow);
+    scrollToBottom();
+}
+function handleSendImage(imageId, ImageUrl) {
+    const msgRow = createImageMessageRow("sent", imageId, ImageUrl, "deleteOwnMessage", "1");
+    messagesContainer.appendChild(msgRow);
+    scrollToBottom();
+}
 
 function createMessageRow(type, messageId, text, deleteClass, order) {
     const row = document.createElement("div");
@@ -180,6 +209,25 @@ function createMessageRow(type, messageId, text, deleteClass, order) {
     msgDiv.id = messageId;
     msgDiv.textContent = text;
     
+    const reactionContainer = createReactionContainer();
+    const { divDelete, divReact } = createMessageOptionsIcons(deleteClass, order);
+
+    row.appendChild(reactionContainer);
+    row.append(msgDiv, divDelete, divReact);
+    return row;
+}
+function createImageMessageRow(type, messageId, imgSrc, deleteClass, order) {
+    const row = document.createElement("div");
+    row.className = `message-row ${type === 'sent' ? 'from right' : 'to left'}`;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `message`;
+    msgDiv.id = messageId;
+    const img = document.createElement("img");
+    img.className = `message-image`;
+    img.src = imgSrc;
+    msgDiv.appendChild(img);
+
     const reactionContainer = createReactionContainer();
     const { divDelete, divReact } = createMessageOptionsIcons(deleteClass, order);
 

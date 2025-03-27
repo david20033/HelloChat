@@ -37,6 +37,24 @@ namespace HelloChat.Hubs
             await _repository.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
             await Clients.User(FromId).SendAsync("ReceiveSeen",messageId);
         }
+        public async Task SendImage(string FromId, string ToId ,string imageName, string base64Image)
+        {
+            var (ImageId,ImageUrl) = await _repository.SendImageAndReturnItsIdAndUrl(FromId, ToId, imageName, base64Image);
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            await Clients.User(FromId).SendAsync("SendImage", ImageId, ImageUrl);
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                if (_onlineUsers.Contains(ToId))
+                {
+                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation);
+                }
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveImage", ImageId, ImageUrl);
+            await _repository.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
+            await Clients.User(FromId).SendAsync("ReceiveSeen", ImageId);
+        }
         public async Task SendTyping(string FromId, string ToId)
         {
             var CurrConversation = GetCurrentUserConversation(FromId);

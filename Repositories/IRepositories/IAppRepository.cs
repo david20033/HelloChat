@@ -20,6 +20,7 @@ namespace HelloChat.Repositories.IRepositories
         Task AcceptFriendRequest(string FromId, string ToId);
 
         Task<Guid> SendMessageAndReturnItsId(string FromId, string ToId, string Content);
+        Task<(Guid, string)> SendImageAndReturnItsIdAndUrl(string FromId, string ToId, string imageName, string base64Image);
         Task<List<string>> GetUserFriendIds(string UserId);
         Task<Guid> SetSeenToLastMessageAndReturnItsId(string UserId, Guid ConversationId);
         Task<string> GetAnotherUserIdInConversationAsync(string UserId, Guid ConversationId);
