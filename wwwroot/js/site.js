@@ -400,6 +400,11 @@ function setupMessageHoverEvents() {
         row?.querySelectorAll(".message-options").forEach(opt => opt.style.display = "none");
     });
 }
+function openImageModal(src) {
+    document.getElementById("modalImage").src = src;
+    var myModal = new bootstrap.Modal(document.getElementById("imageModal"));
+    myModal.show();
+}
 
 function setupReactionUIEvents() {
     const messages = document.getElementById("messages");

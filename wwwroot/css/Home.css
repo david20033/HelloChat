@@ -173,6 +173,8 @@
     max-width: 350px;
     max-height: 300px;
     border-radius:5px;
+    order: 2;
+    cursor:pointer;
 }
 
 .read-status-message {

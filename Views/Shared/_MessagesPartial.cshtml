@@ -29,7 +29,7 @@
             @if (m.ImageUrl != null&&!m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl"/> <partial name="_MessageReactionPartial" model="@m" />
+                    <img class="message-image" src="@m.ImageUrl" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }else{
                 <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
@@ -48,7 +48,7 @@
             @if (m.ImageUrl != null && !m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" /> <partial name="_MessageReactionPartial" model="@m" />
+                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }else{
                 <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
@@ -65,7 +65,7 @@
             @if (m.ImageUrl != null && !m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" /> <partial name="_MessageReactionPartial" model="@m" />
+                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }
             else{
@@ -77,3 +77,16 @@
         </div>
     }
 }
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid" style="max-height: 90vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
