@@ -143,6 +143,25 @@ namespace HelloChat.Repositories
                 ActiveString= active,
             };
         }
+        public async Task<InfoViewModel> GetInfoViewModel(Guid ConversationId, string SenderId)
+        {
+            var ReceiverId = await GetAnotherUserIdInConversationAsync(SenderId, ConversationId);
+            var Receiver = await _context.Users.FirstAsync(u => u.Id == ReceiverId);
+            var Conversation = await _context.Conversation
+                .Include(c => c.Messages)
+                .FirstAsync(c => c.Id == ConversationId);
+            var ImageUrls = Conversation.Messages
+                .Where(m=>m.ImageUrl!=null)
+                .Take(10)
+                .Select(m => m.ImageUrl)
+                .ToList();
+            return new InfoViewModel
+            {
+                Name = Receiver.FirstName + " " + Receiver.LastName,
+                ProfileImagePath = Receiver.ProfilePicturePath,
+                ImagesUrls=ImageUrls,
+            };
+        }
         public async Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId)
         {
             var Conversation = await _context
@@ -160,6 +179,16 @@ namespace HelloChat.Repositories
         {
             return await _context.Messages
                 .Where(m => m.ConversationId == ConversationId)
+                .OrderByDescending(m => m.CreatedDate)
+                .Skip((page - 1) * 10)
+                .Take(10)
+                .OrderBy(m => m.CreatedDate)
+                .ToListAsync();
+        }
+        public async Task<List<Message>> LoadImages(Guid ConversationId, int page)
+        {
+            return await _context.Messages
+                .Where(m => m.ConversationId == ConversationId&&m.ImageUrl!=null)
                 .OrderByDescending(m => m.CreatedDate)
                 .Skip((page - 1) * 10)
                 .Take(10)

@@ -4,10 +4,13 @@ const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build(
 const currentUserId = document.getElementById("FromId")?.value;
 const friendIds = Array.from(document.querySelectorAll(".friend-id")).map(input => input.value);
 var messagesContainer;
+var imageContainer;
 let typingTimer;
 const doneTypingInterval = 1000;
 let page = 1;
+let imagePage = 1;
 let isLoading = false;
+let isImageLoading = false;
 var currentConversationId = null;
 
 connection.on("ReceiveMessage", handleReceiveMessage);
@@ -42,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function setupCommonEvents() {
     messagesContainer = document.getElementById("messages");
+    imageContainer = document.getElementById("images-container");
     const sendButton = document.getElementById("sendButton");
     const contentInput = document.getElementById("Content");
 
@@ -60,6 +64,19 @@ function setupCommonEvents() {
             }
         });
     }
+    if (imageContainer) {
+        imageContainer.addEventListener("click", handleOwnMessageDelete);
+        imageContainer.addEventListener("scroll", function () {
+            const container = this;
+            if(container.scrollHeight - container.scrollTop <= container.clientHeight + 10) {
+
+                loadMoreImages(currentConversationId);
+            }
+        });
+        var checkbox = document.getElementById('checkbox');
+        checkbox.checked = checkbox.checked;
+        document.getElementById('info-container').style.display="none";
+    }
     document.getElementById('imageInput').addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
@@ -76,6 +93,27 @@ function setupCommonEvents() {
         document.getElementById('imageInput').value = ""; 
         document.getElementById('imagePreviewContainer').style.display = 'none';
     });
+    document.getElementById('checkbox').addEventListener('change', function () {
+        let infoContainer = document.getElementById('info-container');
+
+        if (this.checked) {
+            infoContainer.style.display = 'flex'; 
+        } else {
+            infoContainer.style.display = 'none'; 
+        }
+    });
+}
+function setupImageContainerEvents() {
+    const imageContainer = document.getElementById("images-container");
+    debugger;
+    if (imageContainer) {
+        imageContainer.addEventListener("scroll", function () {
+            const container = this;
+            if (container.scrollTop <= 10) {
+                loadMoreImages(currentConversationId);
+            }
+        });
+    }
 }
 
 function setupConversationSwitching() {
@@ -84,6 +122,7 @@ function setupConversationSwitching() {
             const conversationId = el.getAttribute("data-conversation-id");
             currentConversationId = conversationId;
             page = 1;
+            imagePage = 1;
             connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
                 .then(() => renderPartialConversation(conversationId))
                 .catch(console.error);
@@ -92,6 +131,13 @@ function setupConversationSwitching() {
 }
 
 function renderPartialConversation(conversationId) {
+    fetch(`/Home/LoadInfo?conversationId=${conversationId}`)
+        .then(res => res.text())
+        .then(html => {
+            const container = document.getElementById("info-container");
+            container.innerHTML = html;
+        })
+        .catch(console.error);
     fetch(`/Home/LoadConversation?conversationId=${conversationId}`)
         .then(res => res.text())
         .then(html => {
@@ -123,6 +169,22 @@ function loadMoreMessages(conversationId) {
         .catch(error => {
             console.error(error);
             isLoading = false;
+        });
+}
+function loadMoreImages(conversationId) {
+    if (isImageLoading) return;
+    isImageLoading = true;
+    imagePage++;
+    fetch(`/Home/LoadImages?conversationId=${conversationId}&page=${imagePage}`)
+        .then(res => res.text())
+        .then(html => {
+            const container = document.getElementById("images-container");
+            container.insertAdjacentHTML("beforeend", html);
+            isImageLoading = false;
+        })
+        .catch(error => {
+            console.error(error);
+            isImageLoading = false;
         });
 }
 
@@ -174,13 +236,11 @@ function sendMessage(event) {
     const imageInput = document.getElementById("imageInput");
     let imageFile = imageInput.files.length > 0 ? imageInput.files[0] : null;
     console.log("File selected:", imageFile);
-    debugger;
     if (imageFile) {
         const reader = new FileReader();
         reader.onload = function (event) {
             const imageData = event.target.result.split(',')[1]; 
             const imageName = imageFile.name;
-            debugger;
             connection.invoke("SendImage", fromId, toId, imageName, imageData)
                 .catch(console.error);
         };

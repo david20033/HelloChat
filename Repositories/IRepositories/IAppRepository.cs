@@ -9,7 +9,9 @@ namespace HelloChat.Repositories.IRepositories
     {
         Task<List<FriendsViewModel>> GetFriendsViewModelAsync(string CurrentUserId);
         Task<HomeViewModel> GetConversationViewModel(Guid ConversationId, string SenderId);
+        Task<InfoViewModel> GetInfoViewModel(Guid ConversationId, string SenderId);
         Task<List<Message>> LoadMessages(Guid ConversationId, int page);
+        Task<List<Message>> LoadImages(Guid ConversationId, int page);
         Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId);
         Task<List<ApplicationUser>> GetUsersBySearchQuery(string query);
         Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId);

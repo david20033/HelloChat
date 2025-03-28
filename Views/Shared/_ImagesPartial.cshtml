@@ -1,0 +1,5 @@
+﻿@model List<HelloChat.Data.Message>
+
+	@foreach(var m in Model){
+	<img src="@m.ImageUrl" class="info-image" onclick="openImageModal(this.src)" />
+	}

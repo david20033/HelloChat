@@ -85,6 +85,21 @@ namespace HelloChat.Controllers
             var messages =await _homeService.LoadMessages(Guid.Parse(conversationId),page);
             return PartialView("_MessagesPartial", messages);
         }
+        public async Task<IActionResult> LoadInfo(string ConversationId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var Info = await _homeService.GetInfoViewModel(Guid.Parse(ConversationId), userId);
+            return PartialView("_InfoPartial", Info);
+        }
+        public async Task<IActionResult> LoadImages(string conversationId, int page)
+        {
+            var images = await _homeService.LoadImages(Guid.Parse(conversationId), page);
+            return PartialView("_ImagesPartial", images);
+        }
         public IActionResult Privacy()
         {
             return View();

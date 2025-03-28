@@ -1,0 +1,11 @@
+﻿@model HelloChat.ViewModels.InfoViewModel
+
+<h2>Info</h2>
+<img src="@Model.ProfileImagePath" alt="Profile Picture" class="profile-pic">
+<h3 class="username">@Model.Name</h3>
+<h4 class="info-title">Shared Media:</h4>
+<div class="images-container" id="images-container">
+	@foreach(var url in Model.ImagesUrls){
+		<img src="@url" class="info-image" onclick="openImageModal(this.src)">
+	}
+</div>

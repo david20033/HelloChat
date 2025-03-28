@@ -30,10 +30,19 @@ namespace HelloChat.Services
         {
             return await _repository.GetConversationViewModel(ConversationId, SenderId);
         }
+        public async Task<InfoViewModel> GetInfoViewModel(Guid ConversationId, string SenderId)
+        {
+            return await _repository.GetInfoViewModel(ConversationId, SenderId);
+        }
         public async Task<List<Message>> LoadMessages(Guid ConversationId, int page)
         {
             return await _repository.LoadMessages(ConversationId, page);
         
+        }
+        public async Task<List<Message>> LoadImages(Guid ConversationId, int page)
+        {
+            return await _repository.LoadImages(ConversationId, page);
+
         }
         public async Task<Guid?> GetLastSeenMessageId(Guid ConversationId, string ReceiverId)
         {
