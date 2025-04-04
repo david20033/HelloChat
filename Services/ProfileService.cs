@@ -1,7 +1,9 @@
-﻿using HelloChat.Repositories.IRepositories;
+﻿using HelloChat.Enums;
+using HelloChat.Repositories.IRepositories;
 using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace HelloChat.Services
 {
@@ -15,8 +17,44 @@ namespace HelloChat.Services
         }
         public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId)
         {
-            
-            return await _appRepository.GetProfileViewModelById(ProfileUserId, CurrentUserId);
+
+            var user = await _appRepository.GetUserByIdAsync(ProfileUserId);
+            var FriendShipStatus = FriendshipStatus.NoFriends;
+
+            if (await _appRepository.IsFriendRequestExistsAsync(CurrentUserId, ProfileUserId))
+            {
+                if (await _appRepository.IsFriendRequestAccepted(CurrentUserId,ProfileUserId))
+                {
+                    FriendShipStatus = FriendshipStatus.Friends;
+                }
+                else
+                {
+                    FriendShipStatus = FriendshipStatus.FriendRequestSend;
+                }
+            }
+            else if (await _appRepository.IsFriendRequestExistsAsync(ProfileUserId, CurrentUserId))
+            {
+                if (await _appRepository.IsFriendRequestAccepted(ProfileUserId, CurrentUserId))
+                {
+                    FriendShipStatus = FriendshipStatus.Friends;
+                }
+                else
+                {
+                    FriendShipStatus = FriendshipStatus.FriendRequestReceived;
+                }
+            }
+            if (ProfileUserId == CurrentUserId)
+            {
+                FriendShipStatus = FriendshipStatus.SameUser;
+            }
+            return new ProfileViewModel
+            {
+                Email = user?.Email,
+                FullName = user?.FirstName + " " + user?.LastName,
+                Id = ProfileUserId,
+                ProfilePicturePath = user?.ProfilePicturePath,
+                FriendshipStatus = FriendShipStatus
+            };
         }
         public async Task SendFriendRequest(string FromId, string ToId)
         {
@@ -36,7 +74,17 @@ namespace HelloChat.Services
         }
         public async Task<EditProfileViewModel> GetEditProfileViewModel(string UserId)
         {
-            return await _appRepository.GetEditProfileViewModel(UserId);
+            var user = await _appRepository.GetUserByIdAsync(UserId);
+            if (user == null) return null;
+            return new EditProfileViewModel
+            {
+                Id = UserId,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                ProfileImagePath = user.ProfilePicturePath
+            };
         }
         public async Task<(string,string)> TryToEditProfile(EditProfileViewModel model)
         {

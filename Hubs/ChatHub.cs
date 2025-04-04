@@ -5,23 +5,24 @@ using HelloChat.Data;
 using HelloChat.Enums;
 using HelloChat.Repositories;
 using HelloChat.Repositories.IRepositories;
+using HelloChat.Services.IServices;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 namespace HelloChat.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly IAppRepository _repository;
+        private readonly IHomeService _homeService;
         private static readonly List<string> _onlineUsers = [];
         private static readonly Dictionary<string,string> _currentUserConversation = [];
 
-        public ChatHub(IAppRepository repository) 
+        public ChatHub(IHomeService Service) 
         {
-            _repository = repository;
+            _homeService = Service;
         }
         public async Task SendMessage(string FromId, string ToId, string message)
         {
-            var messageId = await _repository.SendMessageAndReturnItsId(FromId, ToId, message);
+            var messageId = await _homeService.SendMessageAndReturnItsId(FromId, ToId, message);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
             await Clients.User(FromId).SendAsync("SendMessage",messageId, message);
@@ -34,12 +35,12 @@ namespace HelloChat.Hubs
                 return;
             }
             await Clients.User(ToId).SendAsync("ReceiveMessage",messageId, message);
-            await _repository.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
+            await _homeService.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
             await Clients.User(FromId).SendAsync("ReceiveSeen",messageId);
         }
         public async Task SendImage(string FromId, string ToId ,string imageName, string base64Image)
         {
-            var (ImageId,ImageUrl) = await _repository.SendImageAndReturnItsIdAndUrl(FromId, ToId, imageName, base64Image);
+            var (ImageId,ImageUrl) = await _homeService.SendImageAndReturnItsIdAndUrl(FromId, ToId, imageName, base64Image);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
             await Clients.User(FromId).SendAsync("SendImage", ImageId, ImageUrl);
@@ -52,7 +53,7 @@ namespace HelloChat.Hubs
                 return;
             }
             await Clients.User(ToId).SendAsync("ReceiveImage", ImageId, ImageUrl);
-            await _repository.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
+            await _homeService.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
             await Clients.User(FromId).SendAsync("ReceiveSeen", ImageId);
         }
         public async Task SendTyping(string FromId, string ToId)
@@ -77,7 +78,7 @@ namespace HelloChat.Hubs
         }
         public async Task SendGlobalDeleteMessage(string FromId, string ToId,string MessageId)
         {
-            await _repository.DeleteMessageContent(Guid.Parse(MessageId));
+            await _homeService.DeleteMessageContent(Guid.Parse(MessageId));
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
             await Clients.User(FromId).SendAsync("ReceiveGlobalDeleteMessage",MessageId);
@@ -89,15 +90,15 @@ namespace HelloChat.Hubs
         }
         public async Task SendLocalDeleteMessage(string FromId, string MessageId)
         {
-            await _repository.SetLocalDeleted(Guid.Parse(MessageId));
+            await _homeService.SetLocalDelete(Guid.Parse(MessageId));
             await Clients.User(FromId).SendAsync("ReceiveLocalDeleteMessage", MessageId);
         }
         public async Task SendCurrentActiveStatus(string UserId)
         {
             var CurrConversation = GetCurrentUserConversation(UserId);
             if(CurrConversation.IsNullOrEmpty()) return;
-            var AnotherUserId = await _repository.GetAnotherUserIdInConversationAsync(UserId,Guid.Parse(CurrConversation));
-            var ActiveString = await _repository.GetUserActiveString(AnotherUserId);
+            var AnotherUserId = await _homeService.GetAnotherUserIdInConversationAsync(UserId,Guid.Parse(CurrConversation));
+            var ActiveString = await _homeService.GetUserActiveString(AnotherUserId);
             await Clients.User(UserId).SendAsync("ReceiveActiveString", ActiveString);
         }
         private  string? GetCurrentUserConversation(string UserId)
@@ -127,7 +128,7 @@ namespace HelloChat.Hubs
                     break;
                 default: return;
             }
-            await _repository.SetMessageReaction(Guid.Parse(MessageId),FromId,ToId,enumReaction);
+            await _homeService.SetMessageReaction(Guid.Parse(MessageId),FromId,ToId,enumReaction);
             var CurrConversation = GetCurrentUserConversation(FromId);
             var ToUserConversation = GetCurrentUserConversation(ToId);
             await Clients.User(FromId).SendAsync("ReceiveMessageReaction", MessageId, enumReaction.ToString(), FromId);
@@ -147,10 +148,10 @@ namespace HelloChat.Hubs
             {
                 _currentUserConversation.Add(UserId, ConversationId);
             }
-            var isSeen = await _repository.isLastMessageSeen(UserId, Guid.Parse(ConversationId));
+            var isSeen = await _homeService.isLastMessageSeen(UserId, Guid.Parse(ConversationId));
             if (isSeen) return;
-            var messageId = await _repository.SetSeenToLastMessageAndReturnItsId(UserId, Guid.Parse(ConversationId));
-            var OtherUserId = await _repository
+            var messageId = await _homeService.SetSeenToLastMessageAndReturnItsId(UserId, Guid.Parse(ConversationId));
+            var OtherUserId = await _homeService
                 .GetAnotherUserIdInConversationAsync(UserId, Guid.Parse(ConversationId));
             if(!_currentUserConversation.TryGetValue(OtherUserId, out var currentID)) return;
             if (currentID == ConversationId)
@@ -166,7 +167,7 @@ namespace HelloChat.Hubs
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
                  _onlineUsers.Add(userId);
-                await _repository.SetUserActive(userId);
+                await _homeService.SetUserActive(userId);
             }
             var FriendIds = await GetFriendIds(userId);
             foreach (var fr in FriendIds)
@@ -181,7 +182,7 @@ namespace HelloChat.Hubs
             string userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             _onlineUsers.Remove(userId);
-            await _repository.SetUserExitActive(userId);
+            await _homeService.SetUserExitActive(userId);
             var onlineFriendIds =  GetOnlineFriends(userId).Result;
             foreach (var fr in onlineFriendIds)
             {
@@ -206,7 +207,7 @@ namespace HelloChat.Hubs
 
         private async Task<List<string>> GetFriendIds(string userId)
         {
-            return await _repository.GetUserFriendIds(userId);
+            return await _homeService.GetUserFriendIds(userId);
         }
     }
 }

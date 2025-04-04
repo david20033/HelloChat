@@ -29,7 +29,7 @@ namespace HelloChat.Controllers
             {
                 return Unauthorized(); 
             }
-            var model = await _homeService.GetFriendsViewModel(userId);
+            var model = await _homeService.GetFriendsViewModelAsync(userId);
 
             ViewBag.FromId = userId;
             return View(model);
