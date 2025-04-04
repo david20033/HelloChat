@@ -1,19 +1,20 @@
 ﻿
-
-.container {
+.container1 {
     display: flex;
+    justify-content: center;
     width: 100%;
-    max-width: 1200px;
+    padding: 100px;
+    /*    max-width: 1200px;*/
     height: 96dvh;
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    padding:0;
+    padding: 0;
 }
 
 .friends-list {
-    width: 30%;
+    width: 20%;
     background: #f1f1f1;
     display: flex;
     flex-direction: column;
@@ -96,9 +97,10 @@
 }
 
 .chat-container {
-    width: 70%;
+    width: 50%;
     display: flex;
     flex-direction: column;
+
 }
 
 .header {
@@ -462,7 +464,7 @@ input[type="file"] {
     margin: 0;
 }
 .info-container {
-    width: 44%;
+    width: 25%;
     background-color: #f7f7f7;
     padding: 15px;
     display: none;
@@ -523,22 +525,32 @@ input[type="file"] {
 
 
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        height: 100vh;
-        border-radius: 0;
+    .container1{
+        width:100%;
+        position:relative;
     }
-
-    .friends-list {
-        width: 100%;
-        border-right: none;
+    .chat-container{
+        width:100%;
     }
-
-    .chat-container {
-        width: 100%;
+    .friends-list{
+        width:fit-content;
     }
-
-    .header {
-        border-top: 1px solid black;
+    .search-box{
+        display:none;
+    }
+    .friends-list h2 {
+        display:none;
+    }
+    .friend-info{
+        display:none;
+    }
+    .friend{
+        width:fit-content;
+    }
+    .info-container{
+        position:absolute;
+        left:0;
+        width:90%;
+        height:96dvh;
     }
 }
