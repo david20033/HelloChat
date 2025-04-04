@@ -29,13 +29,13 @@
             @if (m.ImageUrl != null&&!m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
+                    <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }else{
-                <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
+                <div title="@m.CreatedDate" class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
             }
-            <div class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
-            <div class="message-options React" style="order: 1;">😃</div>
+            <div title="Delete message" class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
+            <div title="React to message" class="message-options React" style="order: 1;">😃</div>
             <small class="read-status-message"><strong>Read</strong> @(m.SeenTime.HasValue ? m.SeenTime.Value.ToString("HH:mm") : "")</small>
             <partial name="_ReactionContainerPartial" />
         </div>
@@ -48,13 +48,13 @@
             @if (m.ImageUrl != null && !m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
+                    <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }else{
-                <div class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
+                <div title="@m.CreatedDate" class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
             }
-            <div class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
-            <div class="message-options React" style="order: 1;">😃</div>
+            <div title="Delete message" class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
+            <div title="React to message" class="message-options React" style="order: 1;">😃</div>
             <partial name="_ReactionContainerPartial" />
         </div>
     }
@@ -65,14 +65,14 @@
             @if (m.ImageUrl != null && !m.isDeleted)
             {
                 <div class="message @PClass" id="@m.Id">
-                    <img class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
+                    <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }
             else{
-                <div class="message received @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
+                <div title="@m.CreatedDate" class="message received @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
             }
-            <div class="message-options deleteSenderMessage" style="order: 3;">🗑️</div>
-            <div class="message-options React" style="order: 3;">😃</div>
+            <div title="Delete message" class="message-options deleteSenderMessage" style="order: 3;">🗑️</div>
+            <div title="React to message" class="message-options React" style="order: 3;">😃</div>
             <partial name="_ReactionContainerPartial" />
         </div>
     }
