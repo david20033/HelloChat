@@ -15,6 +15,7 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<Conversation> Conversation { get; set; }
     public virtual DbSet<FriendRequest> FriendRequest { get; set; }
     public virtual DbSet<Friendship> Friendship { get; set; }
+    public virtual DbSet<Notification> Notification { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -82,5 +83,10 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.FriendshipsReceived)
             .HasForeignKey(f => f.User2Id)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<Notification>()
+            .HasOne(n => n.ApplicationUser)
+            .WithMany(u => u.Notifications)
+            .HasForeignKey(n => n.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

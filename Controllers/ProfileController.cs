@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using AspNetCoreGeneratedDocument;
+using HelloChat.Data;
 using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,15 @@ namespace HelloChat.Controllers
             var ProfileUserId = id;
             var CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var model = await _profileService.GetProfileViewModelById(ProfileUserId, CurrentUserId);
+            ViewBag.FromId = CurrentUserId;
+            ViewBag.FromUserName = await _profileService.GetUserNameById(CurrentUserId);
             return View(model);
+        }
+        public async Task<IActionResult> GetUserNotifications()
+        {
+            var CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var Notifications =await _profileService.GetNotificationsAsync(CurrentUserId);
+            return Json(Notifications);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -29,6 +29,13 @@
                         <li class="nav-item">
                             <partial name="_LoginPartial" />
                         </li>
+                        <li class="nav-item" style="position:relative;">
+                            <button id="notificationButton" class="notification-button">🔔</button>
+                            <div id="red-dot" class="red-dot"></div>
+                            <div id="notificationContainer" class="notification-container hidden">
+                                <p id="no-new">No new notifications</p>
+                            </div>
+                        </li>
                     </ul>
                     <form id="searchForm" asp-action="Search" asp-controller="Home" method="get">
                         <div class="position-relative">
@@ -57,6 +64,49 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+                const button = document.getElementById("notificationButton");
+        const container = document.getElementById("notificationContainer");
+
+        button.addEventListener("click", function (e) {
+            container.classList.toggle("hidden");
+            e.stopPropagation(); 
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!container.contains(e.target)) {
+                container.classList.add("hidden");
+            }
+        });
+
+            document.getElementById("notificationButton").addEventListener("click", async () => {
+            const container = document.getElementById("notificationContainer");
+            const noNew = document.getElementById("no-new");
+
+            try {
+                const response = await fetch("/Profile/GetUserNotifications");
+                const data = await response.json();
+
+                container.innerHTML = '';
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p id="no-new">No new notifications</p>';
+                } else {
+                    data.forEach(n => {
+                        const item = document.createElement("div");
+                        item.classList.add("notification-item");
+
+                        item.innerHTML = `<a href="/Profile?id=${n.hrefId}">${n.content}</a>`;
+                        container.appendChild(item);
+                    });
+                }
+
+                container.classList.remove("hidden"); 
+
+            } catch (err) {
+                console.error("Error fetching notifications", err);
+            }
+        });
+
         $(document).ready(function () {
             $("#searchInput").on("input", function () {
                 var query = $(this).val();

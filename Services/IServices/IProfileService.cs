@@ -1,4 +1,5 @@
-﻿using HelloChat.ViewModels;
+﻿using HelloChat.Data;
+using HelloChat.ViewModels;
 
 namespace HelloChat.Services.IServices
 {
@@ -11,5 +12,7 @@ namespace HelloChat.Services.IServices
         Task AcceptFriendRequest(string FromId, string ToId);
         Task<EditProfileViewModel> GetEditProfileViewModel(string UserId);
         Task<(string, string)> TryToEditProfile(EditProfileViewModel model);
+        Task<string> GetUserNameById(string id);
+        Task<List<Notification>> GetNotificationsAsync(string UserId);
     }
 }

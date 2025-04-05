@@ -43,5 +43,7 @@ namespace HelloChat.Repositories.IRepositories
         Task UpdateUserPicturePath(string UserId, string PicturePath);
         Task EditProfile(EditProfileViewModel model);
         Task<Message> GetMessageByIdAsync(Guid Id);
+        Task AddNotificationAsync(Notification notification);
+        Task<List<Notification>> GetUserNotifications(string UserId);
     }
 }

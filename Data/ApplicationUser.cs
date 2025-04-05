@@ -14,5 +14,6 @@ namespace HelloChat.Data
         public ICollection<FriendRequest> ReceivedRequests { get; set; }
         public ICollection<Friendship> FriendshipsInitiated { get; set; }
         public ICollection<Friendship> FriendshipsReceived { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
     }
 }

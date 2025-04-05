@@ -28,17 +28,24 @@ connection.on("ReceiveLocalDeleteMessage", handleLocalDeleteMessage);
 connection.on("ReceiveMessageReaction", handleMessageReaction);
 connection.on("ReceiveActiveString", updateLastActive);
 connection.on("ReceiveMessageNotification", showNewMessageNotification);
+connection.on("ReceiveFriendRequestNotification", handleReceiveFriendRequest)
 
 connection.start()
     .then(() => connection.invoke("GetOnlineUsers", friendIds).catch(console.error))
     .catch(console.error);
 
 document.addEventListener("DOMContentLoaded", () => {
-    setupConversationSwitching();
-    setupMessageHoverEvents();
-    setupReactionUIEvents();
-    setupCommonEvents();
-    messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
+    const path = window.location.pathname;
+    if (path == "/") {
+        setupConversationSwitching();
+        setupMessageHoverEvents();
+        setupReactionUIEvents();
+        setupCommonEvents();
+        messagesContainer?.scrollTo(0, messagesContainer.scrollHeight);
+    }
+    if (path == "/Profile") {
+        SetupProfileEvents();
+    }
 });
 
 
@@ -102,6 +109,16 @@ function setupCommonEvents() {
             infoContainer.style.display = 'none'; 
         }
     });
+}
+function SetupProfileEvents() {
+    const form = document.querySelector('form[action$="/Profile/SendFriendRequest"]');
+    if (form) {
+        form.addEventListener("submit", function (event) {
+            var ToId = document.getElementById("ToId").value;
+            var FromUserName = document.getElementById("FromUserName").value;
+            connection.invoke("SendFriendRequestNotification",ToId)
+        });
+    }
 }
 function setupImageContainerEvents() {
     const imageContainer = document.getElementById("images-container");
@@ -448,7 +465,10 @@ function handleTyping() {
         connection.invoke("SendStopTyping", fromId, toId).catch(console.error);
     }, doneTypingInterval);
 }
-
+function handleReceiveFriendRequest() {
+    debugger;
+    document.getElementById("red-dot").style.display = "block";
+}
 function setupMessageHoverEvents() {
     messagesContainer?.addEventListener("mouseover", e => {
         const row = e.target.closest(".message-row");

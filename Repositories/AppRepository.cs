@@ -348,6 +348,15 @@ namespace HelloChat.Repositories
             user.ProfilePicturePath = PicturePath;
             await _context.SaveChangesAsync();
         }
+        public async Task AddNotificationAsync (Notification notification)
+        {
+            await _context.Notification.AddAsync(notification);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<List<Notification>> GetUserNotifications(string UserId)
+        {
+            return await _context.Notification.Where(n=>n.ApplicationUserId == UserId).ToListAsync();
+        }
 
     }
 }

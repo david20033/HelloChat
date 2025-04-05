@@ -56,7 +56,9 @@
             <p><strong>Email:</strong> @Model.Email</p>
             <div class="d-flex justify-content-center mt-4">
                 <form id="friendRequestForm" asp-controller="Profile" asp-action="@Action" method="@Method">
-                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input id="ToId" type="hidden" name="id" value="@Model.Id" />
+                    <input id="FromUserName" type="hidden" name="id" value="@ViewBag.FromUserName" />
+                    <input type="hidden" id="FromId" value="@ViewBag.FromId">
                     <button type="submit" class="btn btn-outline-primary me-2" style="width: 120px;">@InnerText</button>
                 </form>
                 <button class="btn btn-outline-success" style="width: 120px;">Send Message</button>
@@ -64,3 +66,6 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chat.js"></script>

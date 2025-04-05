@@ -1,4 +1,5 @@
-﻿using HelloChat.Enums;
+﻿using HelloChat.Data;
+using HelloChat.Enums;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
@@ -58,6 +59,17 @@ namespace HelloChat.Services
         }
         public async Task SendFriendRequest(string FromId, string ToId)
         {
+            var FromUser = await _appRepository.GetUserByIdAsync(FromId);
+            var ToUser = await _appRepository.GetUserByIdAsync(ToId);
+            var notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                Content = FromUser.FirstName + " " + FromUser.LastName + " Send you friend request",
+                HrefId = FromId,
+                ApplicationUser = ToUser,
+                ApplicationUserId = ToId
+            };
+            await _appRepository.AddNotificationAsync(notification);
             await _appRepository.AddFriendRequest(FromId, ToId);
         }
         public async Task DeleteFriend(string FromId, string ToId)
@@ -134,6 +146,16 @@ namespace HelloChat.Services
                 MessageContent = "Please select an image file.";
             }
             return (MessageType, MessageContent);
+        }
+        public async Task<string> GetUserNameById(string id)
+        {
+            var user = await _appRepository.GetUserByIdAsync(id);
+            if (user == null) return "";
+            return user.FirstName+" "+ user.LastName;
+        }
+        public async Task<List<Notification>> GetNotificationsAsync(string UserId)
+        {
+            return await _appRepository.GetUserNotifications(UserId);
         }
     }
 }
