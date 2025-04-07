@@ -213,5 +213,9 @@ namespace HelloChat.Hubs
         {
             await Clients.User(ToId).SendAsync("ReceiveFriendRequestNotification");
         }
+        public async Task SendAcceptFriendRequestNotification(string ToId)
+        {
+            await Clients.User(ToId).SendAsync("ReceiveAcceptFriendRequestNotification");
+        }
     }
 }

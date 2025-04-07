@@ -45,5 +45,6 @@ namespace HelloChat.Repositories.IRepositories
         Task<Message> GetMessageByIdAsync(Guid Id);
         Task AddNotificationAsync(Notification notification);
         Task<List<Notification>> GetUserNotifications(string UserId);
+        Task RemoveNotificationByHref(string href);
     }
 }

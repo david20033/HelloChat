@@ -5,6 +5,7 @@ namespace HelloChat.Services.IServices
 {
     public interface IProfileService
     {
+        Task RemoveNotificationAsync(string hrefId);
         Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId);
         Task SendFriendRequest(string FromId, string ToId);
         Task DeleteFriend(string FromId, string ToId);

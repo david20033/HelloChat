@@ -23,6 +23,7 @@ namespace HelloChat.Controllers
             var ProfileUserId = id;
             var CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var model = await _profileService.GetProfileViewModelById(ProfileUserId, CurrentUserId);
+            await _profileService.RemoveNotificationAsync(id);
             ViewBag.FromId = CurrentUserId;
             ViewBag.FromUserName = await _profileService.GetUserNameById(CurrentUserId);
             return View(model);

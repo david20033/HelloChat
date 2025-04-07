@@ -91,34 +91,8 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-                document.addEventListener('DOMContentLoaded', function() {
-            const notificationButton = document.getElementById('notificationButton');
-            const fullScreenNotifications = document.getElementById('fullScreenNotifications');
-            const closeNotifications = document.getElementById('closeNotifications');
-            const redDot = document.getElementById('red-dot');
-
-            redDot.style.display = 'block';
-
-            // Open full screen notifications
-            notificationButton.addEventListener('click', function() {
-                fullScreenNotifications.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                redDot.style.display = 'none'; 
-            });
-
-            closeNotifications.addEventListener('click', function() {
-                fullScreenNotifications.style.display = 'none';
-                document.body.style.overflow = '';
-            });
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && fullScreenNotifications.style.display === 'flex') {
-                    fullScreenNotifications.style.display = 'none';
-                    document.body.style.overflow = '';
-                }
-            });
-
-            const searchInput = document.getElementById('searchInput');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const searchInput = document.getElementById('searchInput');
             const searchResults = document.getElementById('searchResults');
 
             searchInput.addEventListener('focus', function() {
@@ -132,46 +106,74 @@
             });
         });
 
-                const button = document.getElementById("notificationButton");
-        const container = document.getElementById("notificationContainer");
 
-        button.addEventListener("click", function (e) {
-            container.classList.toggle("hidden");
-            e.stopPropagation(); 
-        });
 
-        document.addEventListener("click", function (e) {
-            if (!container.contains(e.target)) {
-                container.classList.add("hidden");
-            }
-        });
+        const notificationButton = document.getElementById("notificationButton");
+        const notificationContainer = document.getElementById("notificationContainer");
+        const notificationList = document.getElementById("notificationList");
+        const redDot = document.getElementById("red-dot");
+        // Initialize Bootstrap dropdown (if not using data attributes)
+        const dropdown = new bootstrap.Dropdown(notificationButton);
 
-            document.getElementById("notificationButton").addEventListener("click", async () => {
-            const container = document.getElementById("notificationContainer");
-            const noNew = document.getElementById("no-new");
-
+        // Handle notification button click - fetch notifications
+        notificationButton.addEventListener("click", async (e) => {
+            // Clear the red dot notification indicator when opening
+            redDot.style.display = 'none';
             try {
                 const response = await fetch("/Profile/GetUserNotifications");
                 const data = await response.json();
 
-                container.innerHTML = '';
+                // Clear existing notifications
+                // We're keeping the header and footer, just updating the list content
+                notificationList.innerHTML = '';
 
                 if (data.length === 0) {
-                    container.innerHTML = '<p id="no-new">No new notifications</p>';
+                    const noNewElement = document.createElement('div');
+                    noNewElement.id = 'no-new';
+                    noNewElement.className = 'text-center text-muted py-4 px-3';
+                    noNewElement.innerHTML = `
+                        <i class="bi bi-bell-slash fs-4 d-block mb-2 text-secondary"></i>
+                        No new notifications
+                    `;
+                    notificationList.appendChild(noNewElement);
                 } else {
-                    data.forEach(n => {
+                    data.forEach(notification => {
                         const item = document.createElement("div");
                         item.classList.add("notification-item");
 
-                        item.innerHTML = `<a href="/Profile?id=${n.hrefId}">${n.content}</a>`;
-                        container.appendChild(item);
+                        if (notification.isUnread) {
+                            item.classList.add("unread");
+                        }
+
+                        item.innerHTML = `
+                            <a href="/Profile?id=${notification.hrefId}" class="text-decoration-none text-dark d-block">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 50%;">
+                                            
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="mb-1">${notification.content}</p>
+                                        <p class="text-muted small mb-0">${notification.timeAgo || ''}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+
+                        notificationList.appendChild(item);
                     });
                 }
-
-                container.classList.remove("hidden"); 
-
             } catch (err) {
                 console.error("Error fetching notifications", err);
+
+                // Show error message in notification list
+                notificationList.innerHTML = `
+                    <div class="text-center text-danger py-4 px-3">
+                        <i class="bi bi-exclamation-circle fs-4 d-block mb-2"></i>
+                        Failed to load notifications
+                    </div>
+                `;
             }
         });
 

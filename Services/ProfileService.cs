@@ -16,6 +16,10 @@ namespace HelloChat.Services
         {
             _appRepository = appRepository;
         }
+        public async Task RemoveNotificationAsync(string hrefId)
+        {
+            await _appRepository.RemoveNotificationByHref(hrefId);
+        }
         public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId)
         {
 
@@ -82,6 +86,17 @@ namespace HelloChat.Services
         }
         public async Task AcceptFriendRequest(string FromId, string ToId)
         {
+            var FromUser = await _appRepository.GetUserByIdAsync(FromId);
+            var ToUser = await _appRepository.GetUserByIdAsync(ToId);
+            var notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                Content = FromUser.FirstName + " " + FromUser.LastName + " Accepted your friend request",
+                HrefId = FromId,
+                ApplicationUser = ToUser,
+                ApplicationUserId = ToId
+            };
+            await _appRepository.AddNotificationAsync(notification);
             await _appRepository.AcceptFriendRequest(FromId, ToId);
         }
         public async Task<EditProfileViewModel> GetEditProfileViewModel(string UserId)

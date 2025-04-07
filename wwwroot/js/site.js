@@ -28,7 +28,8 @@ connection.on("ReceiveLocalDeleteMessage", handleLocalDeleteMessage);
 connection.on("ReceiveMessageReaction", handleMessageReaction);
 connection.on("ReceiveActiveString", updateLastActive);
 connection.on("ReceiveMessageNotification", showNewMessageNotification);
-connection.on("ReceiveFriendRequestNotification", handleReceiveFriendRequest)
+connection.on("ReceiveFriendRequestNotification", handleReceiveNotification);
+connection.on("ReceiveAcceptFriendRequestNotification", handleReceiveNotification);
 
 connection.start()
     .then(() => connection.invoke("GetOnlineUsers", friendIds).catch(console.error))
@@ -117,6 +118,14 @@ function SetupProfileEvents() {
             var ToId = document.getElementById("ToId").value;
             var FromUserName = document.getElementById("FromUserName").value;
             connection.invoke("SendFriendRequestNotification",ToId)
+        });
+    }
+    const form1 = document.querySelector('form[action$="/Profile/SendAcceptFriendRequestNotification"]');
+    if (form1) {
+        form1.addEventListener("submit", function (event) {
+            var ToId = document.getElementById("ToId").value;
+            var FromUserName = document.getElementById("FromUserName").value;
+            connection.invoke("SendFriendRequestNotification", ToId)
         });
     }
 }
@@ -465,8 +474,7 @@ function handleTyping() {
         connection.invoke("SendStopTyping", fromId, toId).catch(console.error);
     }, doneTypingInterval);
 }
-function handleReceiveFriendRequest() {
-    debugger;
+function handleReceiveNotification() {
     document.getElementById("red-dot").style.display = "block";
 }
 function setupMessageHoverEvents() {
