@@ -28,7 +28,7 @@
 .hidden {
     display: none;
 }
-.notification-container a {
+.notification-item a {
     text-decoration: none;
     color: black;
 }
@@ -53,3 +53,136 @@
         display:none;
     }
 
+.main-header {
+    position: relative;
+}
+
+.navbar {
+    background-color: #ffffff;
+    padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    color: #424242;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+}
+
+    .nav-link:hover {
+        color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.08);
+    }
+
+/* Search Form */
+#searchForm .form-control {
+    width: 260px;
+    height: 40px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    transition: all 0.3s ease;
+}
+
+    #searchForm .form-control:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+    }
+
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    border: 1px solid #e5e7eb;
+    margin-top: 5px;
+}
+
+/* Notification Button */
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+    .btn-icon:hover {
+        background-color: #f1f5f9;
+    }
+
+.notification-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    display: none;
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+    width: 320px;
+    padding: 0;
+    border-radius: 10px;
+    border: none;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    right: 0 !important;
+    left: auto !important;
+}
+
+.notification-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* Notification Item Styling */
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s;
+}
+
+    .notification-item:hover {
+        background-color: #f9fafb;
+    }
+
+    .notification-item.unread {
+        background-color: #ebf5ff;
+    }
+
+/* Media Queries for Responsive Design */
+@media (max-width: 992px) {
+    #searchForm .form-control {
+        width: 100%;
+    }
+
+    .notification-dropdown {
+        position: fixed !important;
+        top: 60px !important;
+        right: 10px !important;
+        width: calc(100% - 20px) !important;
+        max-width: 320px;
+    }
+}
+.navbar-toggler{
+    color: black;
+}

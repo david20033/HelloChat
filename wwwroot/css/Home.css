@@ -5,7 +5,7 @@
     width: 100%;
     padding: 100px;
     /*    max-width: 1200px;*/
-    height: 96dvh;
+    height: 90dvh;
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -209,7 +209,7 @@
     padding: 12px 18px;
     border-radius: 20px;
     font-size: 16px;
-    max-width: 60%;
+/*    max-width: 60%;*/
     min-width: 30px;
     position: relative;
     margin: 8px;

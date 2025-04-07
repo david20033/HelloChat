@@ -10,42 +10,69 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <header class="main-header">
+        <nav class="navbar navbar-expand-lg shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HelloChat</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="text-primary">Hello</span>Chat
+                </a>
+
+                <!-- Toggle Button for Mobile -->
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    More...
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i> Home
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <partial name="_LoginPartial" />
-                        </li>
-                        <li class="nav-item" style="position:relative;">
-                            <button id="notificationButton" class="notification-button">🔔</button>
-                            <div id="red-dot" class="red-dot"></div>
-                            <div id="notificationContainer" class="notification-container hidden">
-                                <p id="no-new">No new notifications</p>
-                            </div>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="bi bi-shield-lock me-1"></i> Privacy
+                            </a>
                         </li>
                     </ul>
-                    <form id="searchForm" asp-action="Search" asp-controller="Home" method="get">
+
+                    <form id="searchForm" asp-action="Search" asp-controller="Home" method="get" class="d-flex me-3">
                         <div class="position-relative">
-                            <input id="searchInput" class="form-control ps-4 pe-5 rounded-pill shadow-sm" type="search" placeholder="Search User" aria-label="Search" name="query" style="width: 200px; height: 36px;" autocomplete="off">
-                            <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 p-0 border-0 bg-transparent text-primary" type="submit">
-                                <i class="bi bi-search"></i>
-                            </button>
-                            <div id="searchResults" class="list-group position-absolute w-100 mt-1" style="display: none; z-index: 1000;"></div>
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            <input id="searchInput" class="form-control ps-5 pe-4 rounded-pill" type="search"
+                                   placeholder="Search users..." aria-label="Search" name="query" autocomplete="off">
+                            <div id="searchResults" class="search-dropdown shadow-lg rounded"></div>
                         </div>
                     </form>
+
+                    <div class="d-flex align-items-center">
+                        <div class="nav-item notification-wrapper me-3 dropdown">
+                            <button id="notificationButton" class="btn btn-icon position-relative"
+                                    aria-label="Notifications" data-bs-toggle="dropdown" aria-expanded="false">
+                                🔔
+                                <span id="red-dot" class="notification-indicator"></span>
+                            </button>
+                            <div id="notificationContainer" class="dropdown-menu notification-dropdown shadow-lg py-0">
+                                <div class="notification-header p-3 border-bottom">
+                                    <h6 class="m-0 fw-bold">Notifications</h6>
+                                </div>
+                                <div id="notificationList" class="notification-list p-0">
+                                    <div id="no-new" class="text-center text-muted py-4 px-3">
+                                        <i class="bi bi-bell-slash fs-4 d-block mb-2 text-secondary"></i>
+                                        No new notifications
+                                    </div>
+                                </div>
+                                <div class="notification-footer p-2 border-top text-center">
+                                    <a href="#" class="text-decoration-none small">See all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Login Partial -->
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
@@ -64,6 +91,47 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+                document.addEventListener('DOMContentLoaded', function() {
+            const notificationButton = document.getElementById('notificationButton');
+            const fullScreenNotifications = document.getElementById('fullScreenNotifications');
+            const closeNotifications = document.getElementById('closeNotifications');
+            const redDot = document.getElementById('red-dot');
+
+            redDot.style.display = 'block';
+
+            // Open full screen notifications
+            notificationButton.addEventListener('click', function() {
+                fullScreenNotifications.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                redDot.style.display = 'none'; 
+            });
+
+            closeNotifications.addEventListener('click', function() {
+                fullScreenNotifications.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && fullScreenNotifications.style.display === 'flex') {
+                    fullScreenNotifications.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+
+            searchInput.addEventListener('focus', function() {
+                searchResults.style.display = 'block';
+            });
+
+            searchInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    searchResults.style.display = 'none';
+                }, 200);
+            });
+        });
+
                 const button = document.getElementById("notificationButton");
         const container = document.getElementById("notificationContainer");
 
