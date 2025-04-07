@@ -23,9 +23,12 @@
                         {
                             <div class="last-message">No messages</div>
                         }
-                        else
+                        else if (item.isLastMessageSeen == true)
                         {
                             <div class="last-message">@item.lastMessage . @item.sentTime</div>
+                        }
+                        else{
+                        <div class="last-message"><b>@item.lastMessage . @item.sentTime</b></div>
                         }
                     </div>
                     @if (item.isLastMessageSeen == true || item.isLastMessageSeen == null)
