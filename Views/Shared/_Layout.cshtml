@@ -16,8 +16,6 @@
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     <span class="text-primary">Hello</span>Chat
                 </a>
-
-                <!-- Toggle Button for Mobile -->
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
                         data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +68,6 @@
                             </div>
                         </div>
 
-                        <!-- Login Partial -->
                         <partial name="_LoginPartial" />
                     </div>
                 </div>
@@ -112,19 +109,14 @@
         const notificationContainer = document.getElementById("notificationContainer");
         const notificationList = document.getElementById("notificationList");
         const redDot = document.getElementById("red-dot");
-        // Initialize Bootstrap dropdown (if not using data attributes)
         const dropdown = new bootstrap.Dropdown(notificationButton);
 
-        // Handle notification button click - fetch notifications
         notificationButton.addEventListener("click", async (e) => {
-            // Clear the red dot notification indicator when opening
             redDot.style.display = 'none';
             try {
                 const response = await fetch("/Profile/GetUserNotifications");
                 const data = await response.json();
 
-                // Clear existing notifications
-                // We're keeping the header and footer, just updating the list content
                 notificationList.innerHTML = '';
 
                 if (data.length === 0) {
@@ -167,7 +159,6 @@
             } catch (err) {
                 console.error("Error fetching notifications", err);
 
-                // Show error message in notification list
                 notificationList.innerHTML = `
                     <div class="text-center text-danger py-4 px-3">
                         <i class="bi bi-exclamation-circle fs-4 d-block mb-2"></i>
