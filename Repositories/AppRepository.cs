@@ -39,6 +39,13 @@ namespace HelloChat.Repositories
         {
             return await _context.Messages.Where(m => m.To_id == Sender && m.From_id == Receiver).ToListAsync();
         }
+        public async Task<Message?> GetLastMessageAsync(string Sender, string Receiver)
+        {
+            return await _context.Messages
+                .Where(m => (m.From_id == Sender && m.To_id == Receiver) || (m.From_id == Receiver && m.To_id == Sender))
+                .OrderByDescending(m => m.CreatedDate)
+                .FirstOrDefaultAsync();
+        }
         public async Task AddConversationAsync(Conversation conversation)
         {
             await _context.Conversation.AddAsync(conversation);
@@ -349,8 +356,8 @@ namespace HelloChat.Repositories
             await _context.SaveChangesAsync();
         }
         public async Task AddNotificationAsync (Notification notification)
-        {
-            if (_context.Notification.Where(n => n.HrefId == notification.HrefId || n.ApplicationUserId == notification.ApplicationUserId).Any())
+         {
+            if (_context.Notification.Where(n => n.HrefId == notification.HrefId && n.ApplicationUserId == notification.ApplicationUserId).Any())
             {
                 return;
             }

@@ -32,15 +32,25 @@ namespace HelloChat.Services
                     user = await _repository.GetUserByIdAsync(f.User1Id);
                 }
                 var Messages = await _repository.GetAllReceivedMessagesAsync(CurrentUserId, user.Id);
+                var LastMessage = await _repository.GetLastMessageAsync(CurrentUserId, user.Id);
+                string LastMessageString = null;
+                if (LastMessage?.From_id == CurrentUserId)
+                {
+                    LastMessageString = "You: " + LastMessage.Content;
+                }
+                else if (LastMessage != null)
+                {
+                    LastMessageString = LastMessage.Content;
+                }
                 var Message = Messages
                     .OrderByDescending(m => m.CreatedDate)
                     .FirstOrDefault();
                 var FriendModel = new FriendsViewModel
                 {
-                    lastMessage = Message?.Content,
+                    lastMessage = LastMessageString,
                     Name = $"{user.FirstName} {user.LastName}",
                     ProfileImageUrl = user.ProfilePicturePath ?? "",
-                    sentTime = Message?.CreatedDate,
+                    sentTime = LastMessage?.CreatedDate,
                     UserId = user.Id,
                     ConversationId = Message?.ConversationId,
                     isLastMessageSeen = Message?.isSeen

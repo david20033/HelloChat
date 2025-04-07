@@ -10,6 +10,7 @@ namespace HelloChat.Repositories.IRepositories
         Task<ApplicationUser> GetUserByIdAsync(string UserId);
         Task<IEnumerable<Friendship>> GetUserFriendshipsAsync(string UserId);
         Task<List<Message>> GetAllReceivedMessagesAsync(string Sender, string Receiver);
+        Task<Message?> GetLastMessageAsync(string Sender, string Receiver);
         Task<Conversation?> GetConversationByIdAsync(Guid Id);
         Task AddConversationAsync(Conversation conversation);
         Task<Conversation?> GetConversationAsync(string User1Id, string User2Id);
