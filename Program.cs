@@ -7,6 +7,7 @@ using HelloChat.Services.IServices;
 using HelloChat.Services;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.Repositories;
+using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
@@ -43,7 +44,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await ApplicationDbInitializer.SeedAsync(services);
+}
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

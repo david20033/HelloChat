@@ -172,5 +172,6 @@ namespace HelloChat.Services
         {
             return await _appRepository.GetUserNotifications(UserId);
         }
+        
     }
 }
