@@ -287,6 +287,7 @@ function handleReceiveMessage(messageId, message) {
 
 function handleSendMessage(messageId, message) {
     const msgRow = createMessageRow("sent", messageId, message, "deleteOwnMessage", "1");
+    document.getElementById("Content").value = "";
     messagesContainer.appendChild(msgRow);
     scrollToBottom();
 }
