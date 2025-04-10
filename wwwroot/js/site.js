@@ -149,6 +149,11 @@ function setupConversationSwitching() {
             currentConversationId = conversationId;
             page = 1;
             imagePage = 1;
+            const element = document.getElementById("last-message");
+
+            if (element && element.innerHTML.includes('<b>')) {
+                element.innerHTML = element.innerHTML.replace(/<\/?b>/g, '');
+            }
             connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
                 .then(() => renderPartialConversation(conversationId))
                 .catch(console.error);
