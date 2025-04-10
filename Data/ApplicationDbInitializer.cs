@@ -78,7 +78,6 @@ namespace HelloChat.Data
                 }
             }
             await context.SaveChangesAsync();
-            //friend request
             var profileService = serviceProvider.GetRequiredService<IProfileService>();
             var homeService = serviceProvider.GetRequiredService<IHomeService>();
             for (int i = 0; i < UsersList.Count; i++)
@@ -88,10 +87,8 @@ namespace HelloChat.Data
                     var userA = UsersList[i];
                     var userB = UsersList[j];
 
-                    // A sends request to B
                     await profileService.SendFriendRequest(userA.Id, userB.Id);
 
-                    // B accepts request from A (so parameters are reversed)
                     await profileService.AcceptFriendRequest(userB.Id, userA.Id);
                 }
             }
@@ -113,13 +110,10 @@ namespace HelloChat.Data
                     var userA = UsersList[i];
                     var userB = UsersList[j];
 
-                    // User A to User B
                     await homeService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[0]);
 
-                    // User B to User A
-                    await homeService.SendMessageAndReturnItsId(userB.Id, userA.Id, messages[1]);
+                    var id=await homeService.SendMessageAndReturnItsId(userB.Id, userA.Id, messages[1]);
 
-                    // User A to User B
                     await homeService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[2]);
                 }
             }
