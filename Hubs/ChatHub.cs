@@ -30,7 +30,7 @@ namespace HelloChat.Hubs
             {
                 if (_onlineUsers.Contains(ToId))
                 {
-                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation);
+                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation, message);
                 }
                 return;
             }

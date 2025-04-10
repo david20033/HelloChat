@@ -464,9 +464,24 @@ function toggleFriendOnlineStatus(id, isOnline) {
     if (el) el.style.display = isOnline ? "inline" : "none";
 }
 
-function showNewMessageNotification(conversationId) {
+function showNewMessageNotification(conversationId,message) {
+    var sound = document.getElementById("notificationSound");
+    sound.play();
     const el = document.querySelector(`[data-conversation-id='${conversationId}'] .new-message`);
+    const mess = document.querySelector(`[data-conversation-id='${conversationId}'] .last-message`);
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); 
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    const formattedDateTime = `${day}.${month}.${year}г. ${hours}:${minutes}:${seconds}`;
     if (el) el.style.display = "block";
+    if (mess) {
+        mess.innerHTML = `<b>${message} . ${formattedDateTime}</b>`;
+    }
 }
 
 function handleTyping() {
