@@ -177,8 +177,8 @@
     text-decoration: line-through;
 }
 .new-message {
-    width: 10px;
-    height: 10px;
+    min-width: 8px;
+    min-height: 8px;
     background-color: red;
     border-radius: 50%;
     margin-left: auto;

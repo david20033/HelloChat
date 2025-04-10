@@ -149,11 +149,6 @@ function setupConversationSwitching() {
             currentConversationId = conversationId;
             page = 1;
             imagePage = 1;
-            const element = document.getElementById("last-message");
-
-            if (element && element.innerHTML.includes('<b>')) {
-                element.innerHTML = element.innerHTML.replace(/<\/?b>/g, '');
-            }
             connection.invoke("SetCurrentUserConversation", currentUserId, conversationId)
                 .then(() => renderPartialConversation(conversationId))
                 .catch(console.error);
@@ -174,8 +169,12 @@ function renderPartialConversation(conversationId) {
         .then(html => {
             const container = document.getElementById("chat-container");
             const el = document.querySelector(`[data-conversation-id='${conversationId}'] .new-message`);
+            const mess = document.querySelector(`[data-conversation-id='${conversationId}'] .last-message`);
             if (el) {
                 el.style.display = "none";
+            }
+            if (mess && mess.innerHTML.includes('<b>')) {
+                mess.innerHTML = mess.innerHTML.replace(/<\/?b>/g, '');
             }
             container.innerHTML = html;
             setupCommonEvents();
