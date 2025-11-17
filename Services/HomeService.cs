@@ -1,4 +1,5 @@
-﻿using HelloChat.Data;
+﻿using System.Speech.Synthesis;
+using HelloChat.Data;
 using HelloChat.Enums;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.Services.IServices;
@@ -11,10 +12,12 @@ namespace HelloChat.Services
     public class HomeService : IHomeService
     {
         private readonly IAppRepository _repository;
+        private readonly IOpenAiService _openAi;
 
-        public HomeService(IAppRepository repository) 
+        public HomeService(IAppRepository repository,IOpenAiService OpenAi) 
         {
             _repository = repository;
+            _openAi = OpenAi;
         }
         public async Task<List<FriendsViewModel>> GetFriendsViewModelAsync(string CurrentUserId)
         {
