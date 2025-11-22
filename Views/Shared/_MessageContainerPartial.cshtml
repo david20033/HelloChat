@@ -32,7 +32,11 @@
             </div>
             <input class="message-input" type="text" id="Content" name="Content" autocomplete="off" placeholder="Type something...">
         </div>
-
+        <label title="Start Audio" for="startAudio" class="custom-file-upload">🎤</label>
+        <input type="button" id="startAudio" hidden>
+        <label title="Stop Audio Audio" for="stopAudio" class="custom-file-upload">🎤</label>
+        <input type="button" id="stopAudio" hidden>
+        <audio id="audioPreview" controls style="display:none;"></audio>
         <label title="Send Image" for="imageInput" class="custom-file-upload">🖼️</label>
         <input type="file" id="imageInput" accept="image/*">
 

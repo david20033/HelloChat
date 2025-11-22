@@ -38,6 +38,10 @@ namespace HelloChat.Hubs
             await _homeService.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
             await Clients.User(FromId).SendAsync("ReceiveSeen",messageId);
         }
+        public async Task SendAudio(string FromId, string ToId, string base64Audio)
+        {
+
+        }
         public async Task SendImage(string FromId, string ToId ,string imageName, string base64Image)
         {
             var (ImageId,ImageUrl) = await _homeService.SendImageAndReturnItsIdAndUrl(FromId, ToId, imageName, base64Image);

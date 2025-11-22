@@ -300,5 +300,6 @@ namespace HelloChat.Services
             }
             return FriendsList;
         }
+
     }
 }
