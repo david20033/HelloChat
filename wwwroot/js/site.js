@@ -12,9 +12,13 @@ let imagePage = 1;
 let isLoading = false;
 let isImageLoading = false;
 var currentConversationId = null;
+let mediaRecorder;
+let audioChunks = [];
+let recordedBlob = null;
 
 connection.on("ReceiveMessage", handleReceiveMessage);
 connection.on("SendMessage", handleSendMessage);
+connection.on("SendAudio", handleSendAudio);
 connection.on("ReceiveImage", handleReceiveImage);
 connection.on("SendImage", handleSendImage);
 connection.on("ReceiveTyping", showTypingIndicator);
@@ -96,6 +100,37 @@ function setupCommonEvents() {
             reader.readAsDataURL(file);
         }
     });
+    document.getElementById('startAudio').addEventListener('click', async function () {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+        mediaRecorder.start();
+
+        //document.getElementById("startBtn").disabled = true;
+        //document.getElementById("stopBtn").disabled = false;
+    });
+    document.getElementById('stopAudio').addEventListener('click', async function () {
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        mediaRecorder.stop();
+
+        mediaRecorder.onstop = () => {
+            recordedBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+            // Preview the recording
+            const previewUrl = URL.createObjectURL(recordedBlob);
+            const previewElem = document.getElementById("audioPreview");
+            previewElem.src = previewUrl;
+            previewElem.style.display = "block";
+
+            //document.getElementById("sendBtn").disabled = false;
+            //document.getElementById("startBtn").disabled = false;
+            //document.getElementById("stopBtn").disabled = true;
+        };
+    })
 
     document.getElementById('removeImage').addEventListener('click', function () {
         document.getElementById('imageInput').value = ""; 
@@ -258,14 +293,20 @@ function removeTypingIndicator() {
     if (el) el.remove();
 }
 
-function sendMessage(event) {
+async function sendMessage(event) {
     event.preventDefault();
     const content = document.getElementById("Content")?.value;
     const toId = document.getElementById("ToId")?.value;
     const fromId = document.getElementById("FromId")?.value;
     const imageInput = document.getElementById("imageInput");
+    const audioPreview = document.getElementById("audioPreview");
     let imageFile = imageInput.files.length > 0 ? imageInput.files[0] : null;
     console.log("File selected:", imageFile);
+    if (recordedBlob) {
+        const base64Audio = await blobToBase64(recordedBlob);
+        connection.invoke("SendAudio", fromId, toId, base64Audio)
+            .catch(console.error);
+    }
     if (imageFile) {
         const reader = new FileReader();
         reader.onload = function (event) {
@@ -295,6 +336,9 @@ function handleSendMessage(messageId, message) {
     messagesContainer.appendChild(msgRow);
     scrollToBottom();
 }
+function handleSendAudio(audioId, audio) {
+
+}
 function handleReceiveImage(imageId, ImageUrl) {
     removeTypingIndicator();
     const msgRow = createImageMessageRow("received", imageId, ImageUrl, "deleteSenderMessage", "3");
@@ -322,6 +366,9 @@ function createMessageRow(type, messageId, text, deleteClass, order) {
     row.appendChild(reactionContainer);
     row.append(msgDiv, divDelete, divReact);
     return row;
+}
+function createAudioRow(type, messageId, imgSrc, deleteClass, order) {
+    alert("audio row created")
 }
 function createImageMessageRow(type, messageId, imgSrc, deleteClass, order) {
     const row = document.createElement("div");
@@ -546,4 +593,46 @@ function setupReactionUIEvents() {
         }
     });
 }
+async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
 
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+    mediaRecorder.start();
+}
+async function stopRecording() {
+    mediaRecorder.stop();
+
+    mediaRecorder.onstop = () => {
+        recordedBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+        // Preview the recording
+        const previewUrl = URL.createObjectURL(recordedBlob);
+        const previewElem = document.getElementById("audioPreview");
+        previewElem.src = previewUrl;
+        previewElem.style.display = "block";
+
+
+    };
+}
+async function sendAudio() {
+    const blob = await stopRecording();
+    const formData = new FormData();
+    formData.append("file", blob, "audio.webm");
+
+    await fetch("/home/UploadAudio", {
+        method: "POST",
+        body: formData
+    });
+}
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]); 
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}

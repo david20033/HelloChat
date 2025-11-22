@@ -100,6 +100,12 @@ namespace HelloChat.Controllers
             var images = await _homeService.LoadImages(Guid.Parse(conversationId), page);
             return PartialView("_ImagesPartial", images);
         }
+        [HttpPost]
+        public  IActionResult UploadAudio(IFormFile file)
+        {
+            Console.WriteLine(file);
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();
