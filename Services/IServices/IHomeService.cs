@@ -10,6 +10,7 @@ namespace HelloChat.Services.IServices
         Task<List<FriendsViewModel>> GetFriendsViewModelAsync(string CurrentUserId);
         Task<List<ApplicationUser>> GetIdentityUsersBySearchQuery(string query);
         Task<Guid> SendMessageAndReturnItsId(string FromId, string ToId, string Content);
+        Task<Guid> SendAudioAndReturnItsId(string FromId, string ToId, string base64Audio);
         Task<HomeViewModel> GetConversationViewModel(Guid ConversationId, string SenderId);
         Task<InfoViewModel> GetInfoViewModel(Guid ConversationId, string SenderId);
 

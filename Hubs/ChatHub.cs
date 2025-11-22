@@ -40,7 +40,21 @@ namespace HelloChat.Hubs
         }
         public async Task SendAudio(string FromId, string ToId, string base64Audio)
         {
-
+            var messageId = await _homeService.SendAudioAndReturnItsId(FromId, ToId, base64Audio);
+            var CurrConversation = GetCurrentUserConversation(FromId);
+            var ToUserConversation = GetCurrentUserConversation(ToId);
+            await Clients.User(FromId).SendAsync("SendAudio", messageId, base64Audio);
+            if (CurrConversation == null || CurrConversation != ToUserConversation)
+            {
+                if (_onlineUsers.Contains(ToId))
+                {
+                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation, "Audio message");
+                }
+                return;
+            }
+            await Clients.User(ToId).SendAsync("ReceiveAudio", messageId, base64Audio);
+            await _homeService.SetSeenToLastMessageAndReturnItsId(ToId, Guid.Parse(CurrConversation));
+            //await Clients.User(FromId).SendAsync("ReceiveSeen", messageId);
         }
         public async Task SendImage(string FromId, string ToId ,string imageName, string base64Image)
         {
@@ -52,7 +66,7 @@ namespace HelloChat.Hubs
             {
                 if (_onlineUsers.Contains(ToId))
                 {
-                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation);
+                    await Clients.User(ToId).SendAsync("ReceiveMessageNotification", CurrConversation, "Image message");
                 }
                 return;
             }

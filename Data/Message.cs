@@ -25,6 +25,7 @@ namespace HelloChat.Data
         [MaxLength(1000)]
         public string Content { get; set; }
         public string? ImageUrl { get; set; }
+        public byte[]? AudioFile { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool isSeen { get; set; }
         public DateTime? SeenTime { get; set; }
