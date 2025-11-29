@@ -12,6 +12,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using HelloChat.Attributes;
 using HelloChat.Data;
+using HelloChat.Repositories;
+using HelloChat.Repositories.IRepositories;
+using HelloChat.Services;
+using HelloChat.Services.IServices;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -31,13 +35,17 @@ namespace HelloChat.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IOpenAiService _openAi;
+        private readonly IUserEmbeddingRepository _userEmbeddingRepository;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IOpenAiService openAi,
+            IUserEmbeddingRepository userEmbeddingRepository)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -45,6 +53,8 @@ namespace HelloChat.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _openAi = openAi;
+            _userEmbeddingRepository = userEmbeddingRepository;
         }
 
         /// <summary>
@@ -76,6 +86,7 @@ namespace HelloChat.Areas.Identity.Pages.Account
 
             [Required]
             public string LastName { get; set; }
+            public string Interests { get; set; }
 
             [Required]
             [DataType(DataType.Date)]
@@ -135,6 +146,8 @@ namespace HelloChat.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    ReadOnlyMemory<float> embeddingVector = await _openAi.GenerateEmbeddingAsync(Input.Interests);
+                    await _userEmbeddingRepository.UpsertEmbeddingAsync(Guid.Parse(user.Id), _openAi.SerializeEmbedding(embeddingVector));
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);

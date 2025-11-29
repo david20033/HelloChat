@@ -16,6 +16,7 @@ public class HelloChatDbContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<FriendRequest> FriendRequest { get; set; }
     public virtual DbSet<Friendship> Friendship { get; set; }
     public virtual DbSet<Notification> Notification { get; set; }
+    public virtual DbSet<UserEmbedding> UserEmbedding { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

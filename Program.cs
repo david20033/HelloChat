@@ -9,6 +9,7 @@ using HelloChat.Services.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenAI;
+using OpenAI.Embeddings;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
@@ -25,6 +26,15 @@ builder.Services.AddSingleton(sp =>
 
     return new OpenAIClient(apiKey);
 });
+builder.Services.AddSingleton(sp =>
+{
+    var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+    if (string.IsNullOrEmpty(apiKey))
+        throw new Exception("Missing OPENAI_API_KEY.");
+
+    return new EmbeddingClient("text-embedding-3-small", apiKey);
+});
+
 
 // Add services to the container.
 //builder.Services.AddDbContext<HelloChatDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
