@@ -186,3 +186,33 @@
 .navbar-toggler{
     color: black;
 }
+.audio-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #e5f7ff;
+    padding: 8px 12px;
+    border-radius: 14px;
+    max-width: 260px;
+}
+
+.audio-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.audio-progress {
+    width: 120px;
+    height: 4px;
+    background: #cfdbe5;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.audio-bar {
+    height: 4px;
+    width: 0%;
+    background: #00a5d5;
+}

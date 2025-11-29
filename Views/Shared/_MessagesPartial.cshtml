@@ -31,7 +31,15 @@
                 <div class="message @PClass" id="@m.Id">
                     <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
-            }else{
+            }
+            else if (m.AudioFile != null && !m.isDeleted)
+            {
+                <div class="message @PClass" id="@m.Id">
+                    <audio title="@m.CreatedDate" class="message-audio" controls src="data:audio/wav;base64,@Convert.ToBase64String(@m.AudioFile)"></audio>
+                    <partial name="_MessageReactionPartial" model="@m" />
+                </div>
+            }
+            else{
                 <div title="@m.CreatedDate" class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
             }
             <div title="Delete message" class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
@@ -50,7 +58,15 @@
                 <div class="message @PClass" id="@m.Id">
                     <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
                 </div>
-            }else{
+            }
+            else if (m.AudioFile != null && !m.isDeleted)
+            {
+                <div class="message @PClass" id="@m.Id">
+                    <audio title="@m.CreatedDate" class="message-audio" controls src="data:audio/wav;base64,@Convert.ToBase64String(@m.AudioFile)"></audio>
+                    <partial name="_MessageReactionPartial" model="@m" />
+                </div>
+            }
+            else{
                 <div title="@m.CreatedDate" class="message sent @PClass" id="@m.Id">@m.Content <partial name="_MessageReactionPartial" model="@m" /></div>
             }
             <div title="Delete message" class="message-options deleteOwnMessage" style="order: 1;">🗑️</div>
@@ -66,6 +82,13 @@
             {
                 <div class="message @PClass" id="@m.Id">
                     <img title="@m.CreatedDate" class="message-image" src="@m.ImageUrl" id="@m.Id" onclick="openImageModal(this.src)" /> <partial name="_MessageReactionPartial" model="@m" />
+                </div>
+            }
+            else if (m.AudioFile != null && !m.isDeleted)
+            {
+                <div class="message @PClass" id="@m.Id">
+                    <audio title="@m.CreatedDate" class="message-audio" controls src="data:audio/wav;base64,@Convert.ToBase64String(@m.AudioFile)"></audio>
+                    <partial name="_MessageReactionPartial" model="@m" />
                 </div>
             }
             else{

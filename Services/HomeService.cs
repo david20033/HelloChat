@@ -213,6 +213,27 @@ namespace HelloChat.Services
             await _repository.AddMessageAsync(Message);
             return (Message.Id, imageUrl);
         }
+        public async Task<Guid> SendAudioAndReturnItsId(string FromId, string ToId, string base64Audio)
+        {
+            if (base64Audio == null) return Guid.Empty;
+            byte[] audioBytes = Convert.FromBase64String(base64Audio);
+            var Conversation = await _repository.GetConversationAsync(FromId, ToId);
+            var Message = new Message
+            {
+                Id = Guid.NewGuid(),
+                Conversation = Conversation,
+                ConversationId = Conversation.Id,
+                From_id = FromId,
+                To_id = ToId,
+                Content = "Audio message",
+                CreatedDate = DateTime.Now,
+                isSeen = false,
+                SeenTime = null,
+                AudioFile = audioBytes,
+            };
+            await _repository.AddMessageAsync(Message);
+            return Message.Id;
+        }
         public async Task DeleteMessageContent(Guid MessageId)
         {
             await _repository.DeleteMessageContent(MessageId);

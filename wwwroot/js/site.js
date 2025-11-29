@@ -304,6 +304,8 @@ async function sendMessage(event) {
     console.log("File selected:", imageFile);
     if (recordedBlob) {
         const base64Audio = await blobToBase64(recordedBlob);
+        document.getElementById("audioPreview").remove();
+        recordedBlob = null;
         connection.invoke("SendAudio", fromId, toId, base64Audio)
             .catch(console.error);
     }
@@ -312,6 +314,7 @@ async function sendMessage(event) {
         reader.onload = function (event) {
             const imageData = event.target.result.split(',')[1]; 
             const imageName = imageFile.name;
+            document.getElementById("imagePreviewContainer").remove();
             connection.invoke("SendImage", fromId, toId, imageName, imageData)
                 .catch(console.error);
         };
@@ -329,6 +332,12 @@ function handleReceiveMessage(messageId, message) {
     messagesContainer.appendChild(msgRow);
     scrollToBottom();
 }
+function handleReceiveAudio(audioId, audio) {
+    removeTypingIndicator();
+    const audioRow = createAudioRow("received", audioId, audio, "deleteSenderMessage", "3");
+    messagesContainer.appendChild(audioRow);
+    scrollToBottom();
+}
 
 function handleSendMessage(messageId, message) {
     const msgRow = createMessageRow("sent", messageId, message, "deleteOwnMessage", "1");
@@ -336,8 +345,11 @@ function handleSendMessage(messageId, message) {
     messagesContainer.appendChild(msgRow);
     scrollToBottom();
 }
-function handleSendAudio(audioId, audio) {
-
+function handleSendAudio(audioId, audio)
+{
+    const audioRow = createAudioRow("sent", audioId, audio, "deleteOwnMessage", "1");
+    messagesContainer.appendChild(audioRow);
+    scrollToBottom();
 }
 function handleReceiveImage(imageId, ImageUrl) {
     removeTypingIndicator();
@@ -367,8 +379,29 @@ function createMessageRow(type, messageId, text, deleteClass, order) {
     row.append(msgDiv, divDelete, divReact);
     return row;
 }
-function createAudioRow(type, messageId, imgSrc, deleteClass, order) {
-    alert("audio row created")
+function createAudioRow(type, messageId, audioBase64, deleteClass, order) {
+    const row = document.createElement("div");
+    row.className = `message-row ${type === 'sent' ? 'from right' : 'to left'}`;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "message";
+    msgDiv.id = messageId;
+
+    // Create <audio> element
+    const audio = document.createElement("audio");
+    audio.className = "message-audio";
+    audio.controls = true;
+
+    // Use base64 as source
+    audio.src = "data:audio/wav;base64," + audioBase64;
+    msgDiv.appendChild(audio);
+
+    const reactionContainer = createReactionContainer();
+    const { divDelete, divReact } = createMessageOptionsIcons(deleteClass, order);
+
+    row.appendChild(reactionContainer);
+    row.append(msgDiv, divDelete, divReact);
+    return row;
 }
 function createImageMessageRow(type, messageId, imgSrc, deleteClass, order) {
     const row = document.createElement("div");
