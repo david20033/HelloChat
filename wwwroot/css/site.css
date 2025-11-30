@@ -168,7 +168,34 @@
     .notification-item.unread {
         background-color: #ebf5ff;
     }
+.profile-link {
+    display: flex;
+    flex-direction: row;
+    text-decoration: none;
+    color: black; 
+    padding: 5px 8px;
+    border-radius: 10px;
+    transition: background 0.25s ease, transform 0.15s ease;
+}
 
+    .profile-link:hover {
+        background: rgba(0, 0, 0, 0.05); 
+        transform: translateY(-1px); 
+        color: black;
+    }
+
+    .profile-link img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+        transition: transform 0.2s ease;
+    }
+
+    .profile-link:hover img {
+        transform: scale(1.05); 
+    }
 /* Media Queries for Responsive Design */
 @media (max-width: 992px) {
     #searchForm .form-control {

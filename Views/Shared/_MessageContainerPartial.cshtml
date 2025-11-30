@@ -1,10 +1,13 @@
 ﻿@model HelloChat.ViewModels.HomeViewModel
     <div class="header">
+    <a href="/Profile/Index/@Model.ReceiverId" class="profile-link">
         <img src="@Model.ProfilePicturePath" alt="profile-picture">
+
         <div class="user-info">
             <div class="name"><b>@Model.Name</b></div>
             <div class="status">@Model.ActiveString</div>
         </div>
+    </a>
     <input id="checkbox" type="checkbox"/>
     <label class="toggle" for="checkbox">
         <div id="bar1" class="bars"></div>

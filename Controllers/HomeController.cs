@@ -34,11 +34,12 @@ namespace HelloChat.Controllers
 
             var model = await _homeService.GetFriendsViewModelAsync(userId);
 
-            var recommendedFriendsResult = 
-                await _friendRecommendationService.RecommendFriendsAsync(Guid.Parse(userId), 5);
-            var recommendedFriendsModel = await _homeService
-                .MapFromRecommendationResultToRecommendedFriendViewModel(recommendedFriendsResult);
-            ViewBag.RecommendedFriends = recommendedFriendsModel;
+            //var recommendedFriendsResult = 
+            //    await _friendRecommendationService.RecommendFriendsAsync(Guid.Parse(userId), 5);
+            //var recommendedFriendsModel = await _homeService
+            //    .MapFromRecommendationResultToRecommendedFriendViewModel(recommendedFriendsResult);
+            //ViewBag.RecommendedFriends = recommendedFriendsModel;
+            ViewBag.RecommendedFriends = new List<RecommendedFriendViewModel>();
             ViewBag.FromId = userId;
 
             return View(model);
