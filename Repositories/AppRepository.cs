@@ -375,10 +375,23 @@ namespace HelloChat.Repositories
 
         public async Task<int> CountMutualFriendsAsync(Guid userId, Guid otherUserId)
         {
-            return await _context.Friendship
-                .Where(f => (f.User1Id == userId.ToString() || f.User2Id == userId.ToString()) &&
-                            (f.User1Id == otherUserId.ToString() || f.User2Id == otherUserId.ToString()))
+            string userIdStr = userId.ToString();
+            string otherUserIdStr = otherUserId.ToString();
+
+            var userFriends = _context.Friendship
+                .Where(f => f.User1Id == userIdStr || f.User2Id == userIdStr)
+                .Select(f => f.User1Id == userIdStr ? f.User2Id : f.User1Id);
+
+            var otherUserFriends = _context.Friendship
+                .Where(f => f.User1Id == otherUserIdStr || f.User2Id == otherUserIdStr)
+                .Select(f => f.User1Id == otherUserIdStr ? f.User2Id : f.User1Id);
+
+            
+            var mutualFriendsCount = await userFriends
+                .Intersect(otherUserFriends)
                 .CountAsync();
+
+            return mutualFriendsCount;
         }
 
         public async Task<List<Guid>> GetFriendsAsync(Guid userId)

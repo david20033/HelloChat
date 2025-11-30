@@ -1,4 +1,5 @@
 ﻿using System.Data.Entity;
+using HelloChat.Repositories.IRepositories;
 using HelloChat.Services;
 using HelloChat.Services.IServices;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,8 @@ namespace HelloChat.Data
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<HelloChatDbContext>();
+            var AiService = serviceProvider.GetRequiredService<IOpenAiService>();
+            var embaddingRepository = serviceProvider.GetRequiredService<IUserEmbeddingRepository>();
             if (context.Users.Count() > 0) { return; }
             await context.Database.MigrateAsync();
 
@@ -26,6 +29,7 @@ namespace HelloChat.Data
                 DateOfBirth = new DateTime(2003, 2, 15),
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 isActive = false,
+                Interests = "Reading, Traveling, Music"
             });
             UsersList.Add(new ApplicationUser
             {
@@ -36,6 +40,7 @@ namespace HelloChat.Data
                 DateOfBirth = new DateTime(2001, 3, 2),
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 isActive = false,
+                Interests = "Sports, Cooking, Movies"
             });
             UsersList.Add(new ApplicationUser
             {
@@ -46,6 +51,7 @@ namespace HelloChat.Data
                 DateOfBirth = new DateTime(2003, 2, 15),
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 isActive = false,
+                Interests = "Gaming, Technology, Art"
             });
             UsersList.Add(new ApplicationUser
             {
@@ -56,6 +62,7 @@ namespace HelloChat.Data
                 DateOfBirth = new DateTime(2003, 2, 15),
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 isActive = false,
+                Interests = "Photography, Fashion, Fitness"
             });
             UsersList.Add(new ApplicationUser
             {
@@ -66,12 +73,15 @@ namespace HelloChat.Data
                 DateOfBirth = new DateTime(2003, 2, 15),
                 ProfilePicturePath = "/images/blank-profile-picture.webp",
                 isActive = false,
+                Interests = "Music, Traveling, Sports"
 
             });
             string password = "123456a";
             foreach (var user in UsersList)
             {
                 var result = await userManager.CreateAsync(user, password);
+                var embedding = await AiService.GenerateEmbeddingAsync(user.Interests);
+                await embaddingRepository.InsertEmbeddingAsync(Guid.Parse(user.Id),AiService.SerializeEmbedding(embedding));
                 if (!result.Succeeded)
                 {
                     throw new Exception("User creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
