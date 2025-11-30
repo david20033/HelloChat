@@ -372,5 +372,39 @@ namespace HelloChat.Repositories
         {
             await _context.Notification.Where(n => n.HrefId == href).ExecuteDeleteAsync();
         }
+
+        public async Task<int> CountMutualFriendsAsync(Guid userId, Guid otherUserId)
+        {
+            return await _context.Friendship
+                .Where(f => (f.User1Id == userId.ToString() || f.User2Id == userId.ToString()) &&
+                            (f.User1Id == otherUserId.ToString() || f.User2Id == otherUserId.ToString()))
+                .CountAsync();
+        }
+
+        public async Task<List<Guid>> GetFriendsAsync(Guid userId)
+        {
+            return await _context.Friendship
+                .Where(f => f.User1Id == userId.ToString() || f.User2Id == userId.ToString())
+                .Select(f => f.User1Id == userId.ToString() ? Guid.Parse(f.User2Id) : Guid.Parse(f.User1Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<Guid>> GetMutualFriendsAsync(Guid userId, Guid otherUserId)
+        {
+            return await _context.Friendship
+                .Where(f => (f.User1Id == userId.ToString() || f.User2Id == userId.ToString()) &&
+                            (f.User1Id == otherUserId.ToString() || f.User2Id == otherUserId.ToString()))
+                .Select(f => f.User1Id == userId.ToString() ? Guid.Parse(f.User2Id) : Guid.Parse(f.User1Id))
+                .ToListAsync();
+
+        }
+
+        public async Task<bool> AreFriendsAsync(Guid userId, Guid otherId)
+        {
+            return await _context.Friendship
+                .Where(f => (f.User1Id == userId.ToString() && f.User2Id == otherId.ToString()) ||
+                            (f.User2Id == userId.ToString() && f.User1Id == otherId.ToString()))
+                .AnyAsync();
+        }
     }
 }

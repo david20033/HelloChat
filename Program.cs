@@ -47,6 +47,9 @@ builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IOpenAiService, OpenAiService>();
+builder.Services.AddScoped<IFriendRecommendationService, FriendRecommendationService>();
+builder.Services.AddScoped<IUserEmbeddingRepository, UserEmbeddingRepository>();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;

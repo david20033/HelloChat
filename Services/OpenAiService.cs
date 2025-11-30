@@ -38,8 +38,7 @@ namespace HelloChat.Services
         public async Task<ReadOnlyMemory<float>> GenerateEmbeddingAsync(string text)
         {
             OpenAIEmbedding Embedding = await _embeddingClient.GenerateEmbeddingAsync(text);
-            ReadOnlyMemory<float> vector = Embedding.ToFloats();
-            return vector;
+            return Embedding.ToFloats();
         }
         public string SerializeEmbedding(ReadOnlyMemory<float> vector)
         {

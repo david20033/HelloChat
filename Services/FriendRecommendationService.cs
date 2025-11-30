@@ -1,48 +1,112 @@
-﻿using HelloChat.Repositories;
+﻿using HelloChat.Data;
+using HelloChat.Models;
+using HelloChat.Repositories;
+using HelloChat.Repositories.IRepositories;
+using HelloChat.Services;
 using HelloChat.Services.IServices;
+using Microsoft.AspNetCore.Identity;
+using static System.Formats.Asn1.AsnWriter;
 
-namespace HelloChat.Services
+public class FriendRecommendationService : IFriendRecommendationService
 {
-    public class FriendRecommendationService
+    private readonly double _embeddingWeight = 0.7;
+    private readonly double _mutualWeight = 0.3;
+    private readonly int _mutualMax = 10;
+    private readonly IUserEmbeddingRepository _embedRepo;
+    private readonly IAppRepository _friendRepo;
+    private readonly IOpenAiService _openAi;
+    private readonly UserManager<ApplicationUser> _userManager;
+    public FriendRecommendationService(
+IUserEmbeddingRepository embedRepo,
+IAppRepository friendRepo,
+IOpenAiService openAi,
+UserManager<ApplicationUser> userManager)
     {
-        private readonly UserEmbeddingRepository _repo;
-        private readonly OpenAiService _openAi;
-        public FriendRecommendationService(UserEmbeddingRepository repo, OpenAiService openAi)
-        {
-            _repo = repo;
-            _openAi = openAi;
-        }
-        private double CosineSimilarity(ReadOnlyMemory<float> a, ReadOnlyMemory<float> b)
-        {
-            double dot = 0, normA = 0, normB = 0;
-            var aSpan = a.Span;
-            var bSpan = b.Span;
+        _embedRepo = embedRepo;
+        _friendRepo = friendRepo;
+        _openAi = openAi;
+        _userManager = userManager;
+    }
 
-            for (int i = 0; i < a.Length; i++)
+    public async Task<List<RecommendationResult>> RecommendFriendsAsync(Guid userId, int take = 10)
+    {
+        var currentEmbedding = await _embedRepo.GetUserByIdAsync(userId);
+        if (currentEmbedding == null)
+            return new List<RecommendationResult>();
+
+
+        var currentVec = _openAi.DeserializeEmbedding(currentEmbedding.EmbeddingJson);
+
+
+        var others = await _embedRepo.GetAllExceptUserAsync(userId);
+
+
+        var userFriends = await _friendRepo.GetFriendsAsync(userId);
+        var excluded = new HashSet<Guid>(userFriends) { userId };
+
+
+        var results = new List<RecommendationResult>();
+
+
+        foreach (var other in others)
+        {
+            if (excluded.Contains(other.Id)) continue; 
+
+
+            var otherVec = _openAi.DeserializeEmbedding(other.EmbeddingJson);
+            var embeddingScore = CosineSimilarity(currentVec, otherVec); 
+
+
+            var mutualCount = await _friendRepo.CountMutualFriendsAsync(userId, other.Id);
+            var mutualScore = CalculateMutualScore(mutualCount);
+
+
+            var finalScore = (_embeddingWeight * embeddingScore) + (_mutualWeight * mutualScore);
+
+
+            results.Add(new RecommendationResult
             {
-                dot += aSpan[i] * bSpan[i];
-                normA += aSpan[i] * aSpan[i];
-                normB += bSpan[i] * bSpan[i];
-            }
-
-            return dot / (Math.Sqrt(normA) * Math.Sqrt(normB));
+                UserId = other.Id,
+                EmbeddingScore = embeddingScore,
+                MutualFriendCount = mutualCount,
+                MutualScore = mutualScore,
+                FinalScore = finalScore
+            });
         }
 
-        public async Task<List<(Guid userId, double score)>> RecommendFriendsAsync(Guid currentUserId)
+
+        return results
+        .OrderByDescending(r => r.FinalScore)
+        .Take(take)
+        .ToList();
+    }
+
+
+    private double CalculateMutualScore(int mutualCount)
+    {
+        var score = Math.Min(mutualCount, _mutualMax) / (double)_mutualMax; 
+        return score;
+    }
+    private double CosineSimilarity(ReadOnlyMemory<float> a, ReadOnlyMemory<float> b)
+    {
+        var aSpan = a.Span;
+        var bSpan = b.Span;
+        if (a.Length == 0 || b.Length == 0) return 0.0;
+        if (a.Length != b.Length) return 0.0; 
+
+
+        double dot = 0, na = 0, nb = 0;
+        for (int i = 0; i < a.Length; i++)
         {
-            var currentUserEmbedding = await _repo.GetUserByIdAsync(currentUserId);
-            if (currentUserEmbedding == null) return new List<(Guid, double)>();
-
-            var currentVec = _openAi.DeserializeEmbedding(currentUserEmbedding.EmbeddingJson);
-            var others = await _repo.GetAllExceptUserAsync(currentUserId);
-
-            var results = others
-                .Select(o => (userId: o.Id, score: CosineSimilarity(currentVec, _openAi.DeserializeEmbedding(o.EmbeddingJson))))
-                .OrderByDescending(x => x.score)
-                .Take(5)
-                .ToList();
-
-            return results;
+            var av = aSpan[i];
+            var bv = bSpan[i];
+            dot += av * bv;
+            na += av * av;
+            nb += bv * bv;
         }
+
+
+        if (na == 0 || nb == 0) return 0.0;
+        return dot / (Math.Sqrt(na) * Math.Sqrt(nb));
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Data.Entity;
+﻿using Microsoft.EntityFrameworkCore;
 using HelloChat.Data;
 using HelloChat.Repositories.IRepositories;
 
@@ -15,7 +15,7 @@ namespace HelloChat.Repositories
         {
             return await _context.UserEmbedding.FindAsync(userId);
         }
-        public async Task UpsertEmbeddingAsync(Guid userId, string embeddingJson)
+        public async Task InsertEmbeddingAsync(Guid userId, string embeddingJson)
         {
             var existing = await _context.UserEmbedding.FindAsync(userId);
             if (existing == null)

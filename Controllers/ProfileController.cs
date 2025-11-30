@@ -13,10 +13,12 @@ namespace HelloChat.Controllers
     public class ProfileController : Controller
     {
         private readonly IProfileService _profileService;
+        private readonly IFriendRecommendationService _recommendationService;
 
-        public ProfileController(IProfileService profileService) 
+        public ProfileController(IProfileService profileService, IFriendRecommendationService recommendationService) 
         {
             _profileService = profileService;
+            _recommendationService = recommendationService;
         }
         public async Task<IActionResult> Index(string id)
         {
@@ -116,6 +118,18 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Edit");
             }
+        }
+        public async Task<IActionResult> RecommendFriends()
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId.IsNullOrEmpty())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var model = await _recommendationService.RecommendFriendsAsync(Guid.TryParse(currentUserId, out Guid Id) ? Id : Guid.Empty);
+            if (model == null) return NotFound();
+
+            return Json(model);
         }
 
     }

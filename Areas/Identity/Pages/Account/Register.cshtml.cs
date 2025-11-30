@@ -147,7 +147,7 @@ namespace HelloChat.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     ReadOnlyMemory<float> embeddingVector = await _openAi.GenerateEmbeddingAsync(Input.Interests);
-                    await _userEmbeddingRepository.UpsertEmbeddingAsync(Guid.Parse(user.Id), _openAi.SerializeEmbedding(embeddingVector));
+                    await _userEmbeddingRepository.InsertEmbeddingAsync(Guid.Parse(user.Id), _openAi.SerializeEmbedding(embeddingVector));
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
