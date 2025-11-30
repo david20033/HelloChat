@@ -16,22 +16,31 @@ namespace HelloChat.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IHomeService _homeService;
+        private readonly IFriendRecommendationService _friendRecommendationService;
 
-        public HomeController(ILogger<HomeController> logger, IHomeService homeService)
+        public HomeController(ILogger<HomeController> logger, IHomeService homeService, IFriendRecommendationService friendRecommendationService)
         {
             _logger = logger;
             _homeService = homeService;
+            _friendRecommendationService = friendRecommendationService;
         }
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(); 
+                return Unauthorized();
             }
+
             var model = await _homeService.GetFriendsViewModelAsync(userId);
 
+            var recommendedFriendsResult = 
+                await _friendRecommendationService.RecommendFriendsAsync(Guid.Parse(userId), 5);
+            var recommendedFriendsModel = await _homeService
+                .MapFromRecommendationResultToRecommendedFriendViewModel(recommendedFriendsResult);
+            ViewBag.RecommendedFriends = recommendedFriendsModel;
             ViewBag.FromId = userId;
+
             return View(model);
         }
         //[HttpPost]

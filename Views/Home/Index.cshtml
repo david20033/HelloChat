@@ -1,5 +1,6 @@
 ﻿@using HelloChat.Enums
 @model ICollection<HelloChat.ViewModels.FriendsViewModel>
+
 @section Styles {
     <link href="/css/Home.css" rel="stylesheet" />
 }
@@ -9,45 +10,62 @@
         <h2>Conversations</h2>
         <input type="text" class="search-box" placeholder="Search friends...">
         <input type="hidden" id="FromId" value="@ViewBag.FromId">
-            @foreach (var item in Model)
-            {
-                <input type="hidden" class="friend-id" value="@item.UserId" />
+
+        @foreach (var item in Model)
+        {
+            <input type="hidden" class="friend-id" value="@item.UserId" />
             <div class="friend ConversationChanger" data-user-id="@item.UserId" data-conversation-id="@item.ConversationId">
-                    <div class="image-div">
-                        <img src="@item.ProfileImageUrl" alt="profile-picture">
-                        <div class="online-circle" id="@item.UserId"></div>
-                    </div>
+                <div class="image-div">
+                    <img src="@item.ProfileImageUrl" alt="profile-picture">
+                    <div class="online-circle" id="@item.UserId"></div>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">@item.Name</div>
-                        @if (item.lastMessage == null)
-                        {
-                            <div class="last-message">No messages</div>
-                        }
-                        else if (item.isLastMessageSeen == true)
-                        {
-                            <div class="last-message">@item.lastMessage . @item.sentTime</div>
-                        }
-                        else{
-                        <div  class="last-message"><b>@item.lastMessage . @item.sentTime</b></div>
-                        }
-                    </div>
-                    @if (item.isLastMessageSeen == true || item.isLastMessageSeen == null)
+
+                    @if (item.lastMessage == null)
                     {
-                        <div class="new-message" style="display:none">
-                        </div>
+                        <div class="last-message">No messages</div>
                     }
-                    else{
-                        <div class="new-message" style="display:block">
-                        </div>
+                    else if (item.isLastMessageSeen == true)
+                    {
+                        <div class="last-message">@item.lastMessage . @item.sentTime</div>
+                    }
+                    else
+                    {
+                        <div class="last-message"><b>@item.lastMessage . @item.sentTime</b></div>
                     }
                 </div>
-            }
-    </div>
-    <div class="chat-container" id="chat-container">
 
+                @if (item.isLastMessageSeen == true || item.isLastMessageSeen == null)
+                {
+                    <div class="new-message" style="display:none"></div>
+                }
+                else
+                {
+                    <div class="new-message" style="display:block"></div>
+                }
+            </div>
+        }
+
+        <h3 class="recommend-title">People you may know</h3>
+
+        @foreach (var rec in ViewBag.RecommendedFriends)
+        {
+            <div class="recommended-friend">
+                <div class="rec-image-div">
+                    <img src="@rec.ProfileImageUrl" alt="profile-picture">
+                </div>
+                <div class="rec-info">
+                    <div class="rec-name">@rec.Name</div>
+                    <div class="rec-reason">@rec.Reason</div>
+                </div>
+                <button class="add-friend-btn" data-user-id="@rec.UserId">Add +</button>
+            </div>
+        }
     </div>
-    <div class="info-container" id="info-container">
-    </div>
+
+    <div class="chat-container" id="chat-container"></div>
+    <div class="info-container" id="info-container"></div>
 </div>
 
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
@@ -66,5 +84,3 @@
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/chat.js"></script>
-
-    

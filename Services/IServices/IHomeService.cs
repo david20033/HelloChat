@@ -1,5 +1,6 @@
 ﻿using HelloChat.Data;
 using HelloChat.Enums;
+using HelloChat.Models;
 using HelloChat.ViewModels;
 using Microsoft.AspNetCore.Identity;
 
@@ -29,5 +30,6 @@ namespace HelloChat.Services.IServices
         Task SetUserActive(string UserId);
         Task SetUserExitActive(string UserId);
         Task<List<string>> GetUserFriendIds(string UserId);
+        Task <List<RecommendedFriendViewModel>> MapFromRecommendationResultToRecommendedFriendViewModel(List<RecommendationResult> recommendations);
     }
 }

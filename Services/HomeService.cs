@@ -1,6 +1,7 @@
 ﻿using System.Speech.Synthesis;
 using HelloChat.Data;
 using HelloChat.Enums;
+using HelloChat.Models;
 using HelloChat.Repositories.IRepositories;
 using HelloChat.Services.IServices;
 using HelloChat.ViewModels;
@@ -322,5 +323,22 @@ namespace HelloChat.Services
             return FriendsList;
         }
 
+        public async Task<List<RecommendedFriendViewModel>> MapFromRecommendationResultToRecommendedFriendViewModel(List<RecommendationResult> recommendations)
+        {
+            List<RecommendedFriendViewModel> Result = new List<RecommendedFriendViewModel>();
+            foreach (var rec in recommendations)
+            {
+                var user = await _repository.GetUserByIdAsync(rec.UserId.ToString());
+                if (user == null) continue;
+                Result.Add(new RecommendedFriendViewModel
+                {
+                    UserId = user.Id,
+                    Name = $"{user.FirstName} {user.LastName}",
+                    ProfileImageUrl = user.ProfilePicturePath ?? "",
+                    Reason = $"Mutual Friends: {rec.MutualFriendCount}, Score: {rec.FinalScore:F2}"
+                });
+            }
+            return Result;
+        }
     }
 }
