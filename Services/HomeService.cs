@@ -335,7 +335,7 @@ namespace HelloChat.Services
                     UserId = user.Id,
                     Name = $"{user.FirstName} {user.LastName}",
                     ProfileImageUrl = user.ProfilePicturePath ?? "",
-                    Reason = $"Mutual Friends: {rec.MutualFriendCount}, Score: {rec.FinalScore:F2}"
+                    Reason = $"{rec.Reasoning}"
                 });
             }
             return Result;

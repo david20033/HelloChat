@@ -521,7 +521,8 @@ input[type="file"] {
     text-align: start;
     width: 90%;
 }
-
+*{
+}   
 .recommend-title {
     margin-top: 20px;
     margin-bottom: 10px;

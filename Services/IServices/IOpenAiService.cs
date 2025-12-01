@@ -6,5 +6,6 @@
         Task<ReadOnlyMemory<float>> GenerateEmbeddingAsync(string text);
         string SerializeEmbedding(ReadOnlyMemory<float> vector);
         ReadOnlyMemory<float> DeserializeEmbedding(string json);
+         Task<string> GetAiReasonAsync(int mutualCount, string mutualInterest);
     }
 }

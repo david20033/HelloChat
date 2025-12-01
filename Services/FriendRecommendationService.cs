@@ -59,18 +59,20 @@ UserManager<ApplicationUser> userManager)
 
             var mutualCount = await _friendRepo.CountMutualFriendsAsync(userId, other.Id);
             var mutualScore = CalculateMutualScore(mutualCount);
-
+            var mutualInterests= await _friendRepo.GetCommonInterestsAsync(userId.ToString(), other.Id.ToString());
 
             var finalScore = (_embeddingWeight * embeddingScore) + (_mutualWeight * mutualScore);
 
-
+            var Reasoning = await _openAi.GetAiReasonAsync(mutualCount, mutualInterests);
             results.Add(new RecommendationResult
             {
                 UserId = other.Id,
                 EmbeddingScore = embeddingScore,
                 MutualFriendCount = mutualCount,
                 MutualScore = mutualScore,
-                FinalScore = finalScore
+                FinalScore = finalScore,
+                MutualInterests = mutualInterests,
+                Reasoning = Reasoning
             });
         }
 
