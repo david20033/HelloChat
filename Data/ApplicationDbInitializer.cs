@@ -89,7 +89,9 @@ namespace HelloChat.Data
             }
             await context.SaveChangesAsync();
             var profileService = serviceProvider.GetRequiredService<IProfileService>();
-            var homeService = serviceProvider.GetRequiredService<IHomeService>();
+            var friendService = serviceProvider.GetRequiredService<IFriendService>();
+            var messageService = serviceProvider.GetRequiredService<IMessageService>();
+
             for (int i = 0; i < UsersList.Count; i++)
             {
                 for (int j = i + 1; j < UsersList.Count; j++)
@@ -97,14 +99,14 @@ namespace HelloChat.Data
                     var userA = UsersList[i];
                     var userB = UsersList[j];
 
-                    await profileService.SendFriendRequest(userA.Id, userB.Id);
+                    await friendService.SendFriendRequest(userA.Id, userB.Id);
 
-                    await profileService.AcceptFriendRequest(userB.Id, userA.Id);
+                    await friendService.AcceptFriendRequest(userB.Id, userA.Id);
                 }
             }
             foreach (var user in UsersList)
             {
-                await homeService.GetFriendsViewModelAsync(user.Id);
+                await friendService.GetFriendsViewModelAsync(user.Id);
             }
             var messages = new[]
 {
@@ -120,11 +122,12 @@ namespace HelloChat.Data
                     var userA = UsersList[i];
                     var userB = UsersList[j];
 
-                    await homeService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[0]);
+                    await messageService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[0]);
 
-                    var id=await homeService.SendMessageAndReturnItsId(userB.Id, userA.Id, messages[1]);
+                    var id = await messageService.SendMessageAndReturnItsId(userB.Id, userA.Id, messages[1]);
 
-                    await homeService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[2]);
+                    await messageService.SendMessageAndReturnItsId(userA.Id, userB.Id, messages[2]);
+
                 }
             }
         }

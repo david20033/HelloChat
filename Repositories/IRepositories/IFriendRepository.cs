@@ -16,5 +16,6 @@ namespace HelloChat.Repositories.IRepositories
         Task<List<Guid>> GetFriendsAsync(Guid userId);
         Task<List<Guid>> GetMutualFriendsAsync(Guid userId, Guid otherUserId);
         Task<bool> AreFriendsAsync(Guid userId, Guid otherId);
+        Task<string> GetCommonInterestsAsync(string User1Id, string User2Id);
     }
 }

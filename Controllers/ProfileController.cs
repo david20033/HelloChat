@@ -13,11 +13,15 @@ namespace HelloChat.Controllers
     public class ProfileController : Controller
     {
         private readonly IProfileService _profileService;
+        private readonly IFriendService _friendService;
         private readonly IFriendRecommendationService _recommendationService;
 
-        public ProfileController(IProfileService profileService, IFriendRecommendationService recommendationService) 
+        public ProfileController(IProfileService profileService,
+            IFriendService friendService,
+            IFriendRecommendationService recommendationService) 
         {
             _profileService = profileService;
+            _friendService = friendService;
             _recommendationService = recommendationService;
         }
         public async Task<IActionResult> Index(string id)
@@ -45,7 +49,7 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Index", new { id = id });
             }
-            await _profileService.SendFriendRequest(currentUserId, id);
+            await _friendService.SendFriendRequest(currentUserId, id);
             return RedirectToAction("Index" ,new {id});
         }
 
@@ -58,7 +62,7 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Index", new { id });
             }
-            await _profileService.DeleteFriend(currentUserId, id);
+            await _friendService.DeleteFriend(currentUserId, id);
             return RedirectToAction("Index", new { id });
         }
         [HttpPost]
@@ -70,7 +74,7 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Index", new {id });
             }
-            await _profileService.DeleteFriendRequest(currentUserId, id);
+            await _friendService.DeleteFriendRequest(currentUserId, id);
             return RedirectToAction("Index", new { id });
         }
         [HttpPost]
@@ -82,7 +86,7 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Index", new { id });
             }
-            await _profileService.AcceptFriendRequest(currentUserId, id);
+            await _friendService.AcceptFriendRequest(currentUserId, id);
             return RedirectToAction("Index", new { id });
         }
         public async Task<IActionResult> Edit()

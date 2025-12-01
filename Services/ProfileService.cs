@@ -10,25 +10,31 @@ namespace HelloChat.Services
 {
     public class ProfileService : IProfileService
     {
-        private readonly IAppRepository _appRepository;
-
-        public ProfileService(IAppRepository appRepository) 
+        private readonly IUserRepository _userRepo;
+        private readonly INotificationRepository _notificationRepo;
+        private readonly IFriendRepository _friendRepo;
+        public ProfileService(
+            IUserRepository userRepo,
+            INotificationRepository notificationRepository,
+            IFriendRepository friendRepo) 
         {
-            _appRepository = appRepository;
+            _userRepo = userRepo;
+            _notificationRepo = notificationRepository;
+            _friendRepo = friendRepo;
         }
         public async Task RemoveNotificationAsync(string hrefId)
         {
-            await _appRepository.RemoveNotificationByHref(hrefId);
+            await _notificationRepo.RemoveNotificationByHref(hrefId);
         }
         public async Task<ProfileViewModel> GetProfileViewModelById(string ProfileUserId, string CurrentUserId)
         {
 
-            var user = await _appRepository.GetUserByIdAsync(ProfileUserId);
+            var user = await _userRepo.GetUserByIdAsync(ProfileUserId);
             var FriendShipStatus = FriendshipStatus.NoFriends;
 
-            if (await _appRepository.IsFriendRequestExistsAsync(CurrentUserId, ProfileUserId))
+            if (await _friendRepo.IsFriendRequestExistsAsync(CurrentUserId, ProfileUserId))
             {
-                if (await _appRepository.IsFriendRequestAccepted(CurrentUserId,ProfileUserId))
+                if (await _friendRepo.IsFriendRequestAccepted(CurrentUserId,ProfileUserId))
                 {
                     FriendShipStatus = FriendshipStatus.Friends;
                 }
@@ -37,9 +43,9 @@ namespace HelloChat.Services
                     FriendShipStatus = FriendshipStatus.FriendRequestSend;
                 }
             }
-            else if (await _appRepository.IsFriendRequestExistsAsync(ProfileUserId, CurrentUserId))
+            else if (await _friendRepo.IsFriendRequestExistsAsync(ProfileUserId, CurrentUserId))
             {
-                if (await _appRepository.IsFriendRequestAccepted(ProfileUserId, CurrentUserId))
+                if (await _friendRepo.IsFriendRequestAccepted(ProfileUserId, CurrentUserId))
                 {
                     FriendShipStatus = FriendshipStatus.Friends;
                 }
@@ -61,47 +67,10 @@ namespace HelloChat.Services
                 FriendshipStatus = FriendShipStatus
             };
         }
-        public async Task SendFriendRequest(string FromId, string ToId)
-        {
-            var FromUser = await _appRepository.GetUserByIdAsync(FromId);
-            var ToUser = await _appRepository.GetUserByIdAsync(ToId);
-            var notification = new Notification
-            {
-                Id = Guid.NewGuid(),
-                Content = FromUser.FirstName + " " + FromUser.LastName + " Send you friend request",
-                HrefId = FromId,
-                ApplicationUser = ToUser,
-                ApplicationUserId = ToId
-            };
-            await _appRepository.AddNotificationAsync(notification);
-            await _appRepository.AddFriendRequest(FromId, ToId);
-        }
-        public async Task DeleteFriend(string FromId, string ToId)
-        {
-            await _appRepository.DeleteFriend(FromId, ToId);
-        }
-        public async Task DeleteFriendRequest(string FromId, string ToId)
-        {
-            await _appRepository.DeleteFriendRequest(FromId, ToId);
-        }
-        public async Task AcceptFriendRequest(string FromId, string ToId)
-        {
-            var FromUser = await _appRepository.GetUserByIdAsync(FromId);
-            var ToUser = await _appRepository.GetUserByIdAsync(ToId);
-            var notification = new Notification
-            {
-                Id = Guid.NewGuid(),
-                Content = FromUser.FirstName + " " + FromUser.LastName + " Accepted your friend request",
-                HrefId = FromId,
-                ApplicationUser = ToUser,
-                ApplicationUserId = ToId
-            };
-            await _appRepository.AddNotificationAsync(notification);
-            await _appRepository.AcceptFriendRequest(FromId, ToId);
-        }
+       
         public async Task<EditProfileViewModel> GetEditProfileViewModel(string UserId)
         {
-            var user = await _appRepository.GetUserByIdAsync(UserId);
+            var user = await _userRepo.GetUserByIdAsync(UserId);
             if (user == null) return null;
             return new EditProfileViewModel
             {
@@ -117,7 +86,7 @@ namespace HelloChat.Services
         {
             if (model.ProfileImage == null)
             {
-                await _appRepository.EditProfile(model);
+                await _userRepo.EditProfile(model);
                 return ("Success", "Profile is edited successfully");
             }
             string MessageType = "";
@@ -150,8 +119,8 @@ namespace HelloChat.Services
                 }
 
                 var relativePath = "/UploadedImages/ProfilePictures/" + fileName;
-                await _appRepository.UpdateUserPicturePath(model.Id, relativePath);
-                await _appRepository.EditProfile(model);
+                await _userRepo.UpdateUserPicturePath(model.Id, relativePath);
+                await _userRepo.EditProfile(model);
                 MessageType = "Success";
                 MessageContent = "Profile image uploaded successfully.";
             }
@@ -164,13 +133,13 @@ namespace HelloChat.Services
         }
         public async Task<string> GetUserNameById(string id)
         {
-            var user = await _appRepository.GetUserByIdAsync(id);
+            var user = await _userRepo.GetUserByIdAsync(id);
             if (user == null) return "";
             return user.FirstName+" "+ user.LastName;
         }
         public async Task<List<Notification>> GetNotificationsAsync(string UserId)
         {
-            return await _appRepository.GetUserNotifications(UserId);
+            return await _notificationRepo.GetUserNotifications(UserId);
         }
         
     }

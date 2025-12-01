@@ -168,5 +168,33 @@ namespace HelloChat.Repositories
             if (fr == null) return false;
             else return true;
         }
+        public async Task<string> GetCommonInterestsAsync(string User1Id, string User2Id)
+        {
+            if (string.IsNullOrWhiteSpace(User1Id) || string.IsNullOrWhiteSpace(User2Id))
+                return string.Empty;
+
+            var interestsUser1 = (await _context.Users
+                .Where(u => u.Id == User1Id)
+                .Select(u => u.Interests)
+                .FirstOrDefaultAsync()) ?? string.Empty;
+            var interestsUser2 = (await _context.Users
+                .Where(u => u.Id == User2Id)
+                .Select(u => u.Interests)
+                .FirstOrDefaultAsync()) ?? string.Empty;
+
+            var set1 = new HashSet<string>(
+                interestsUser1.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                              .Select(i => i.Trim().ToLower())
+            );
+
+            var set2 = new HashSet<string>(
+                interestsUser2.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                              .Select(i => i.Trim().ToLower())
+            );
+
+            set1.IntersectWith(set2);
+
+            return string.Join(", ", set1);
+        }
     }
 }

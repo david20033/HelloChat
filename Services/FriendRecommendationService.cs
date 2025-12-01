@@ -13,12 +13,12 @@ public class FriendRecommendationService : IFriendRecommendationService
     private readonly double _mutualWeight = 0.3;
     private readonly int _mutualMax = 10;
     private readonly IUserEmbeddingRepository _embedRepo;
-    private readonly IAppRepository _friendRepo;
+    private readonly IFriendRepository _friendRepo;
     private readonly IOpenAiService _openAi;
     private readonly UserManager<ApplicationUser> _userManager;
     public FriendRecommendationService(
 IUserEmbeddingRepository embedRepo,
-IAppRepository friendRepo,
+IFriendRepository friendRepo,
 IOpenAiService openAi,
 UserManager<ApplicationUser> userManager)
     {

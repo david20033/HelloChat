@@ -15,14 +15,19 @@ namespace HelloChat.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IHomeService _homeService;
         private readonly IFriendRecommendationService _friendRecommendationService;
+        private readonly IFriendService _friendService;
+        private readonly IConversationService _convService;
 
-        public HomeController(ILogger<HomeController> logger, IHomeService homeService, IFriendRecommendationService friendRecommendationService)
+        public HomeController(ILogger<HomeController> logger, 
+            IFriendRecommendationService friendRecommendationService,
+            IFriendService friendService,
+            IConversationService conversationService)
         {
             _logger = logger;
-            _homeService = homeService;
             _friendRecommendationService = friendRecommendationService;
+            _friendService = friendService;
+            _convService = conversationService;
         }
         public async Task<IActionResult> Index()
         {
@@ -32,11 +37,11 @@ namespace HelloChat.Controllers
                 return Unauthorized();
             }
 
-            var model = await _homeService.GetFriendsViewModelAsync(userId);
+            var model = await _friendService.GetFriendsViewModelAsync(userId);
 
             var recommendedFriendsResult =
                 await _friendRecommendationService.RecommendFriendsAsync(Guid.Parse(userId), 5);
-            var recommendedFriendsModel = await _homeService
+            var recommendedFriendsModel = await _friendService
                 .MapFromRecommendationResultToRecommendedFriendViewModel(recommendedFriendsResult);
             ViewBag.RecommendedFriends = recommendedFriendsModel;
             //ViewBag.RecommendedFriends = new List<RecommendedFriendViewModel>();
@@ -62,7 +67,7 @@ namespace HelloChat.Controllers
             {
                 return Json(new { });
             }
-            var users = await _homeService.GetIdentityUsersBySearchQuery(query);
+            var users = await _friendService.GetIdentityUsersBySearchQuery(query);
             Console.WriteLine(Json(users));
             return Json(users);
         }
@@ -72,7 +77,7 @@ namespace HelloChat.Controllers
             {
                 return RedirectToAction("Index");
             }
-            var users= await _homeService.GetIdentityUsersBySearchQuery(query);
+            var users= await _friendService.GetIdentityUsersBySearchQuery(query);
             return View(users);
         }
         public async Task<IActionResult> LoadConversation(string conversationId)
@@ -82,17 +87,17 @@ namespace HelloChat.Controllers
             {
                 return Unauthorized();
             }
-            var Conversation  = await _homeService.GetConversationViewModel(Guid.Parse(conversationId),userId);
+            var Conversation  = await _convService.GetConversationViewModel(Guid.Parse(conversationId),userId);
             return PartialView("_MessageContainerPartial", Conversation);
         }
         public async Task<IActionResult> LoadMessages(string conversationId, int page,string SenderId)
         {
-            var ReceiverId = await _homeService.GetAnotherUserId(Guid.Parse(conversationId), SenderId);
-            var LastSeenMessage = await _homeService.GetLastSeenMessageId(Guid.Parse(conversationId), ReceiverId);
+            var ReceiverId = await _convService.GetAnotherUserId(Guid.Parse(conversationId), SenderId);
+            var LastSeenMessage = await _convService.GetLastSeenMessageId(Guid.Parse(conversationId), ReceiverId);
             ViewData["LastSeenMessageId"] = LastSeenMessage;
             ViewData["SenderId"] = SenderId;
             ViewData["ReceiverId"] = ReceiverId;
-            var messages =await _homeService.LoadMessages(Guid.Parse(conversationId),page);
+            var messages =await _convService.LoadMessages(Guid.Parse(conversationId),page);
             return PartialView("_MessagesPartial", messages);
         }
         public async Task<IActionResult> LoadInfo(string ConversationId)
@@ -102,12 +107,12 @@ namespace HelloChat.Controllers
             {
                 return Unauthorized();
             }
-            var Info = await _homeService.GetInfoViewModel(Guid.Parse(ConversationId), userId);
+            var Info = await _convService.GetInfoViewModel(Guid.Parse(ConversationId), userId);
             return PartialView("_InfoPartial", Info);
         }
         public async Task<IActionResult> LoadImages(string conversationId, int page)
         {
-            var images = await _homeService.LoadImages(Guid.Parse(conversationId), page);
+            var images = await _convService.LoadImages(Guid.Parse(conversationId), page);
             return PartialView("_ImagesPartial", images);
         }
         [HttpPost]

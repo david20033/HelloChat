@@ -43,8 +43,6 @@ builder.Services.AddSignalR(options =>
 {
     options.MaximumReceiveMessageSize = 24 * 1024 * 1024;
 });
-builder.Services.AddScoped<IHomeService, HomeService>();
-builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 builder.Services.AddScoped<IFriendRecommendationService, FriendRecommendationService>();
